@@ -1,0 +1,505 @@
+/* --- Color & Theme Variables --- */
+:root {
+    /* Default to Light Theme Variables */
+    --bg-color: #f0f0f0;
+    --text-color: #333;
+    --block-bg: #fff;
+    --block-border: #333;
+    --header-bg: #f0f0f0;
+    --header-border: #333;
+    --button-bg: #ddd;
+    --button-hover: #ccc;
+    --link-color: #0077cc;
+    --meta-color: #555;
+    --shadow-color: rgba(0, 0, 0, 0.2);
+    --code-bg: #e9e9e9;
+    --code-border: #ddd;
+}
+
+/* System-based Dark Mode */
+@media (prefers-color-scheme: dark) {
+    body[data-theme="system"] {
+        --bg-color: #111;
+        --text-color: #f0f0f0;
+        --block-bg: #1e1e1e;
+        --block-border: #555;
+        --header-bg: #1a1a1a;
+        --header-border: #444;
+        --button-bg: #333;
+        --button-hover: #444;
+        --link-color: #66b3ff;
+        --meta-color: #999;
+        --shadow-color: rgba(0, 0, 0, 0.4);
+        --code-bg: #2a2a2a;
+        --code-border: #444;
+    }
+}
+
+/* Explicit Dark Mode */
+body[data-theme="dark"] {
+    --bg-color: #111;
+    --text-color: #f0f0f0;
+    --block-bg: #1e1e1e;
+    --block-border: #555;
+    --header-bg: #1a1a1a;
+    --header-border: #444;
+    --button-bg: #333;
+    --button-hover: #444;
+    --link-color: #66b3ff;
+    --meta-color: #999;
+    --shadow-color: rgba(0, 0, 0, 0.4);
+    --code-bg: #2a2a2a;
+    --code-border: #444;
+}
+
+/* --- General Body & Layout --- */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", "Oxygen Mono", "Ubuntu Mono", "Source Code Pro", "Fira Mono", "Droid Sans Mono", "Consolas", "Courier New", monospace;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    background-image: radial-gradient(circle, var(--block-border) 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-attachment: fixed;
+    margin: 0;
+}
+
+/* --- Fixed Header & Theme Toggle Button --- */
+#header-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 35px;
+    background-color: var(--header-bg);
+    border-bottom: 1px solid var(--header-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 10px;
+    z-index: 10;
+}
+
+#profile-name {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+#theme-toggle-button, #about-button {
+    background-color: var(--button-bg);
+    border: 1px solid var(--block-border);
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: 14px;
+    padding: 4px 10px;
+    user-select: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    width: 70px;
+    text-align: center;
+}
+
+#theme-toggle-button:hover, #about-button:hover {
+    background-color: var(--button-hover);
+}
+
+/* --- Filter Buttons --- */
+#filter-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.filter-button {
+    background-color: var(--button-bg);
+    border: 1px solid var(--block-border);
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: 14px;
+    padding: 4px 10px;
+    user-select: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.filter-button:hover {
+    background-color: var(--button-hover);
+}
+
+.filter-button.active {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+    border-color: var(--text-color);
+}
+
+/* --- Main Scrolling Content Area --- */
+#content-area {
+    padding: 40px 1em 50px 1em;
+    max-width: 50em;
+    margin: 0 auto;
+}
+
+/* --- Thought Block Styling --- */
+.thought-container {
+    margin: 1.5em 0;
+}
+
+.thought-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 0.5em;
+    gap: 1em;
+}
+
+.thought-date {
+    font-size: 0.8rem;
+    color: var(--meta-color);
+    flex-shrink: 0;
+}
+
+.thought-date a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.thought-date a:hover {
+    text-decoration: underline;
+}
+
+.thought-title {
+    font-size: 0.8rem;
+    /* font-weight: 600; */
+    color: var(--meta-color);
+    text-align: left;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    flex: 0 1 auto; /* Changed from flex: 1 to only take needed space */
+    max-width: calc(100% - 2em); /* Prevent overflow, leave some space */
+    position: relative;
+    /* cursor: help; - removed, will be added via JS only for titles with tooltips */
+}
+
+.thought-title[data-tooltip-id] {
+    cursor: help; /* Only show help cursor for titles that have tooltips */
+}
+
+.tooltip-content {
+    position: fixed; /* Changed from absolute to fixed for better positioning */
+    background-color: var(--block-bg);
+    border: 2px solid var(--block-border);
+    box-shadow: 3px 3px 0px var(--shadow-color);
+    padding: 0.75em;
+    font-size: 0.8rem;
+    font-weight: normal;
+    max-width: 300px;
+    width: max-content;
+    z-index: 1000; /* Increased z-index to ensure it's above everything */
+    line-height: 1.4;
+    word-wrap: break-word;
+    pointer-events: auto; /* Changed from none to auto to allow interaction */
+    cursor: default; /* Reset cursor to default when over tooltip */
+    /* Position will be set by JavaScript */
+}
+
+.tooltip-content p {
+    margin: 0.25em 0;
+}
+
+.tooltip-content p:first-child {
+    margin-top: 0;
+}
+
+.tooltip-content p:last-child {
+    margin-bottom: 0;
+}
+
+.tooltip-content a {
+    color: var(--link-color);
+}
+
+.tooltip-content a:hover {
+    text-decoration: underline;
+}
+
+.thought-content {
+    background-color: var(--block-bg);
+    border: 2px solid var(--block-border);
+    padding: 1em;
+    box-shadow: 5px 5px 0px var(--shadow-color);
+    word-wrap: break-word;
+    line-height: 1.6;
+}
+
+.thought-content>*:first-child {
+    margin-top: 0;
+}
+
+.thought-content>*:last-child {
+    margin-bottom: 0;
+}
+
+/* --- Link Block Styling --- */
+.link-container {
+  display: flex;
+  gap: 1em;
+  align-items: flex-start;
+}
+
+.link-thumb {
+  flex-shrink: 0;
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border: 1px solid var(--block-border);
+}
+
+.link-main {
+  flex-grow: 1;
+  min-width: 0; /* Prevents flex item from overflowing */
+}
+
+.link-description {
+  margin-bottom: 1em;
+}
+
+.link-description > p {
+  margin: 0;
+}
+
+.link-button {
+  display: inline-block;
+  background-color: var(--button-bg);
+  border: 1px solid var(--block-border);
+  color: var(--text-color);
+  font-family: inherit;
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  user-select: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.link-button:hover {
+  background-color: var(--button-hover);
+  text-decoration: none;
+}
+
+/* --- Typographic Elements --- */
+a {
+    color: var(--link-color);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+strong {
+    font-weight: 600;
+}
+
+blockquote {
+    border-left: 2px solid var(--block-border);
+    padding-left: 0.8em;
+    margin-left: 0;
+    color: var(--meta-color);
+    margin-block: 0;
+    margin-inline: 0;
+}
+
+blockquote p {
+    margin: 0;
+}
+
+pre {
+    background-color: var(--code-bg);
+    border: 1px solid var(--code-border);
+    padding: 1em;
+    overflow-x: auto;
+}
+
+code {
+    font-family: inherit;
+    font-size: .85rem;
+    line-height: 0.5rem;
+}
+
+:not(pre)>code {
+    background-color: var(--code-bg);
+    border: 1px solid var(--code-border);
+    padding: 0.2em 0.4em;
+    font-size: 85%;
+}
+
+/* --- Fixed Footer --- */
+#footer-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 35px;
+    background-color: var(--header-bg);
+    border-top: 1px solid var(--header-border);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.8em;
+    padding: 5px 10px;
+}
+
+#footer-bar p {
+    margin: 0;
+    line-height: 1;
+}
+
+#footer-bar a {
+    color: var(--link-color);
+}
+
+/* --- Markdown contents --- */
+ul p,
+ol p {
+    margin: 0;
+}
+
+ul, ol {
+    margin: 1em 0;
+    padding-left: 1.5em;
+}
+
+p {
+    margin: 1em 0;
+}
+
+hr {
+    border: 0;
+    border-top: 2px dashed var(--block-border);
+    margin: .8em 0;
+}
+
+/* --- Media & Embed Styling --- */
+.embed-container {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    height: 0;
+    overflow: hidden;
+    max-width: 100%;
+    margin: 1em 0;
+}
+
+.embed-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.media-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5em;
+    color: var(--text-color);
+}
+
+.media-description {
+    font-size: 0.9rem;
+    color: var(--meta-color);
+    margin-bottom: 1em;
+    line-height: 1.5;
+}
+
+/* Responsive images */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* --- Scroll offset for anchors to account for fixed header --- */
+html {
+    scroll-padding-top: 40px;
+}
+
+/* --- Modal Styles --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+}
+
+.modal-content {
+    background-color: var(--block-bg);
+    border: 2px solid var(--block-border);
+    padding: 2em;
+    box-shadow: 5px 5px 0px var(--shadow-color);
+    max-width: 40em;
+    width: 90%;
+    position: relative;
+}
+
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    color: var(--text-color);
+}
+
+.modal-content h2 {
+    margin-top: 0;
+}
+
+#modal-buttons {
+    margin-top: 1.5em;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.modal-button {
+    display: inline-block;
+    background-color: var(--button-bg);
+    border: 1px solid var(--block-border);
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: 0.9rem;
+    padding: 8px 15px;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.modal-button:hover {
+    background-color: var(--button-hover);
+    text-decoration: none;
+}
+
+body{
+    /* Universal text selection styling */
+    ::selection {
+        background-color: var(--text-color);
+        color: var(--bg-color);
+    }
+      
+    /* Firefox support */
+    ::-moz-selection {
+        background-color: var(--text-color);
+        color: var(--bg-color);
+    }
+}

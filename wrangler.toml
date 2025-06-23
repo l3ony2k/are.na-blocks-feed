@@ -1,0 +1,17 @@
+name = "thoughts"
+main = "src/worker.ts"
+compatibility_date = "2025-05-26"
+
+[vars]
+CHANNEL_SLUG = "journaling-and-healing"
+
+format = "modules"
+
+[[rules]]
+type = "Text"
+globs = ["*.html", "*.css", "*.js"]
+fallthrough = true
+
+# wrangler.toml (wrangler v3.88.0^)
+[observability.logs]
+enabled = true

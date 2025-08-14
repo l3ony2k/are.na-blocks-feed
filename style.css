@@ -88,7 +88,8 @@ body {
     font-weight: 600;
 }
 
-#theme-toggle-button, #about-button {
+#theme-toggle-button,
+#about-button {
     background-color: var(--button-bg);
     border: 1px solid var(--block-border);
     color: var(--text-color);
@@ -102,7 +103,8 @@ body {
     text-align: center;
 }
 
-#theme-toggle-button:hover, #about-button:hover {
+#theme-toggle-button:hover,
+#about-button:hover {
     background-color: var(--button-hover);
 }
 
@@ -177,18 +179,22 @@ body {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    flex: 0 1 auto; /* Changed from flex: 1 to only take needed space */
-    max-width: calc(100% - 2em); /* Prevent overflow, leave some space */
+    flex: 0 1 auto;
+    /* Changed from flex: 1 to only take needed space */
+    max-width: calc(100% - 2em);
+    /* Prevent overflow, leave some space */
     position: relative;
     /* cursor: help; - removed, will be added via JS only for titles with tooltips */
 }
 
 .thought-title[data-tooltip-id] {
-    cursor: help; /* Only show help cursor for titles that have tooltips */
+    cursor: help;
+    /* Only show help cursor for titles that have tooltips */
 }
 
 .tooltip-content {
-    position: fixed; /* Changed from absolute to fixed for better positioning */
+    position: fixed;
+    /* Changed from absolute to fixed for better positioning */
     background-color: var(--block-bg);
     border: 2px solid var(--block-border);
     box-shadow: 3px 3px 0px var(--shadow-color);
@@ -197,11 +203,14 @@ body {
     font-weight: normal;
     max-width: 300px;
     width: max-content;
-    z-index: 1000; /* Increased z-index to ensure it's above everything */
+    z-index: 1000;
+    /* Increased z-index to ensure it's above everything */
     line-height: 1.4;
     word-wrap: break-word;
-    pointer-events: auto; /* Changed from none to auto to allow interaction */
-    cursor: default; /* Reset cursor to default when over tooltip */
+    pointer-events: auto;
+    /* Changed from none to auto to allow interaction */
+    cursor: default;
+    /* Reset cursor to default when over tooltip */
     /* Position will be set by JavaScript */
 }
 
@@ -244,49 +253,50 @@ body {
 
 /* --- Link Block Styling --- */
 .link-container {
-  display: flex;
-  gap: 1em;
-  align-items: flex-start;
+    display: flex;
+    gap: 1em;
+    align-items: flex-start;
 }
 
 .link-thumb {
-  flex-shrink: 0;
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-  border: 1px solid var(--block-border);
+    flex-shrink: 0;
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border: 1px solid var(--block-border);
 }
 
 .link-main {
-  flex-grow: 1;
-  min-width: 0; /* Prevents flex item from overflowing */
+    flex-grow: 1;
+    min-width: 0;
+    /* Prevents flex item from overflowing */
 }
 
 .link-description {
-  margin-bottom: 1em;
+    margin-bottom: 1em;
 }
 
-.link-description > p {
-  margin: 0;
+.link-description>p {
+    margin: 0;
 }
 
 .link-button {
-  display: inline-block;
-  background-color: var(--button-bg);
-  border: 1px solid var(--block-border);
-  color: var(--text-color);
-  font-family: inherit;
-  font-size: 0.8rem;
-  padding: 4px 10px;
-  user-select: none;
-  cursor: pointer;
-  text-decoration: none;
-  transition: background-color 0.2s ease;
+    display: inline-block;
+    background-color: var(--button-bg);
+    border: 1px solid var(--block-border);
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: 0.8rem;
+    padding: 4px 10px;
+    user-select: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
 }
 
 .link-button:hover {
-  background-color: var(--button-hover);
-  text-decoration: none;
+    background-color: var(--button-hover);
+    text-decoration: none;
 }
 
 /* --- Typographic Elements --- */
@@ -368,7 +378,8 @@ ol p {
     margin: 0;
 }
 
-ul, ol {
+ul,
+ol {
     margin: 1em 0;
     padding-left: 1.5em;
 }
@@ -386,7 +397,8 @@ hr {
 /* --- Media & Embed Styling --- */
 .embed-container {
     position: relative;
-    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    padding-bottom: 56.25%;
+    /* 16:9 aspect ratio */
     height: 0;
     overflow: hidden;
     max-width: 100%;
@@ -490,13 +502,43 @@ html {
     text-decoration: none;
 }
 
-body{
+/* --- Scrollbar Styling --- */
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--block-border);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-color);
+}
+
+::-webkit-scrollbar-corner {
+    background: var(--bg-color);
+}
+
+/* Firefox */
+html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--block-border) var(--bg-color);
+}
+
+body {
+
     /* Universal text selection styling */
     ::selection {
         background-color: var(--text-color);
         color: var(--bg-color);
     }
-      
+
     /* Firefox support */
     ::-moz-selection {
         background-color: var(--text-color);

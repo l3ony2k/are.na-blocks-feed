@@ -43,12 +43,15 @@ export default {
       });
     }
 
-    // Only root path serves the page
-    if (url.pathname !== '/') {
+    // Check if this is an embed request
+    const isEmbed = url.pathname === '/embed';
+    
+    // Only root path and /embed serve the page
+    if (url.pathname !== '/' && !isEmbed) {
       return new Response('Not found', { status: 404 });
     }
 
-    // Try edge cache for rendered HTML first
+    // Try edge cache for rendered HTML first (separate cache for embed vs normal)
     const cacheKey = new Request(request.url, request);
     // Cast to any to satisfy TypeScript for caches.default
     const cache = (caches as any).default as Cache;
@@ -243,7 +246,46 @@ export default {
       })
       .join('\n');
 
-    const html = templateHtml.replace('<!--THOUGHTS-->', blocksHtml);
+    let html: string;
+    
+    if (isEmbed) {
+      // Create embed version without header, footer, and background
+      html = `<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Cache-Control" content="no-store">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/style.css">
+    <title>Leon's Journal - Embed</title>
+    <style>
+      /* Embed-specific overrides */
+      body {
+        background-image: none !important;
+        background-color: transparent !important;
+      }
+      #header-bar, #footer-bar {
+        display: none !important;
+      }
+      #content-area {
+        padding: 35px 1em !important;
+      }
+      .thought-container {
+        margin: 1em 0 !important;
+      }
+    </style>
+  </head>
+  <body data-theme="system">
+    <main id="content-area">
+      ${blocksHtml}
+    </main>
+    <script src="/theme.js"></script>
+  </body>
+</html>`;
+    } else {
+      // Normal version
+      html = templateHtml.replace('<!--THOUGHTS-->', blocksHtml);
+    }
 
     const response = new Response(html, {
       headers: {

@@ -12,6 +12,11 @@ type = "Text"
 globs = ["*.html", "*.css", "*.js"]
 fallthrough = true
 
+[[rules]]
+type = "Data"
+globs = ["*.webp"]
+fallthrough = true
+
 # wrangler.toml (wrangler v3.88.0^)
 [observability.logs]
 enabled = true

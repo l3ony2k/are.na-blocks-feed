@@ -2,6 +2,8 @@
 import templateHtml from '../index.html';
 import styleCss from '../style.css';
 import themeJs from '../theme.js';
+// @ts-ignore - WebP import handled by wrangler
+import ogImage from '../og.webp';
 
 type Env = {
   CHANNEL_SLUG: string;
@@ -42,10 +44,15 @@ export default {
         headers: { 'content-type': 'application/javascript; charset=utf-8', 'cache-control': 'public, max-age=31536000, immutable' },
       });
     }
+    if (url.pathname === '/og.webp') {
+      return new Response(ogImage, {
+        headers: { 'content-type': 'image/webp', 'cache-control': 'public, max-age=31536000, immutable' },
+      });
+    }
 
     // Check if this is an embed request
     const isEmbed = url.pathname === '/embed';
-    
+
     // Only root path and /embed serve the page
     if (url.pathname !== '/' && !isEmbed) {
       return new Response('Not found', { status: 404 });
@@ -130,7 +137,7 @@ export default {
 
     // Execute all requests concurrently
     const pageResponses = await Promise.all(pagePromises);
-    
+
     // Check all responses are successful
     for (const resp of pageResponses) {
       if (!resp.ok) {
@@ -141,7 +148,7 @@ export default {
     // Parse all responses and combine contents
     const pageDataPromises = pageResponses.map(resp => resp.json() as Promise<ArenaChannelResponse>);
     const allPageData = await Promise.all(pageDataPromises);
-    
+
     // Combine all contents from all pages
     const allBlocks: ArenaBlock[] = [];
     for (const pageData of allPageData) {
@@ -178,7 +185,7 @@ export default {
           if (block.embed && block.embed.html) {
             // Use the embed HTML directly (it's already an iframe from Are.na)
             rendered = `<div class="embed-container">${block.embed.html}</div>`;
-            
+
             // Add title and description if available
             // if (block.title) {
             //   rendered = `<h3 class="media-title">${escapeHtml(block.title)}</h3>` + rendered;
@@ -247,7 +254,7 @@ export default {
       .join('\n');
 
     let html: string;
-    
+
     if (isEmbed) {
       // Create embed version without header, footer, and background
       html = `<!doctype html>
@@ -256,6 +263,14 @@ export default {
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="Cache-Control" content="no-store">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- open graph -->
+    <meta property="og:title" content="Leon's Journal" />
+    <meta property="og:description" content="A page of things in my mind." />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Leon's Journal" />
+    <meta property="og:image" content="/og.webp" />
+    
     <link rel="stylesheet" type="text/css" href="/style.css">
     <title>Leon's Journal - Embed</title>
     <style>

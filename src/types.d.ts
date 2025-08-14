@@ -1,16 +1,39 @@
-declare module '*.html' {
-  const content: string;
-  export default content;
-}
-declare module '*.css' {
-  const content: string;
-  export default content;
-}
-declare module '*.js' {
+declare module '*.webp' {
   const content: string;
   export default content;
 }
 
-declare interface ExecutionContext {
-  waitUntil(promise: Promise<any>): void;
-} 
+declare module '*.png' {
+  const content: string;
+  export default content;
+}
+
+declare module '*.jpg' {
+  const content: string;
+  export default content;
+}
+
+declare module '*.jpeg' {
+  const content: string;
+  export default content;
+}
+
+declare module '*.gif' {
+  const content: string;
+  export default content;
+}
+
+declare module '*.html' {
+  const content: string;
+  export default content;
+}
+
+declare module '*.css' {
+  const content: string;
+  export default content;
+}
+
+declare module '*.js' {
+  const content: string;
+  export default content;
+}

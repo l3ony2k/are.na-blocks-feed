@@ -236,9 +236,9 @@ body {
 
 .thought-content {
     background-color: var(--block-bg);
-    border: 2px solid var(--block-border);
+    border: 1px solid var(--block-border);
     padding: 1em;
-    box-shadow: 5px 5px 0px var(--shadow-color);
+    box-shadow: 3px 3px 5px var(--shadow-color);
     word-wrap: break-word;
     line-height: 1.6;
 }
@@ -456,9 +456,9 @@ html {
 
 .modal-content {
     background-color: var(--block-bg);
-    border: 2px solid var(--block-border);
+    border: 1px solid var(--block-border);
     padding: 2em;
-    box-shadow: 5px 5px 0px var(--shadow-color);
+    box-shadow: 3px 3px 5px var(--shadow-color);
     max-width: 40em;
     width: 90%;
     position: relative;
@@ -528,7 +528,7 @@ html {
 /* Firefox */
 html {
     scrollbar-width: thin;
-    scrollbar-color: var(--block-border) var(--bg-color);
+    scrollbar-color: var(--bg-color);
 }
 
 body {

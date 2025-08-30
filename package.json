@@ -1,0 +1,17 @@
+{
+  "name": "lok-thoughts-page-arena",
+  "version": "1.0.0",
+  "description": "A page of Leon's thoughts connected to Are.na channel",
+  "main": "src/worker.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "wrangler": "^4.33.1"
+  },
+  "devDependencies": {},
+  "keywords": ["cloudflare", "worker", "arena"],
+  "author": "Leon",
+  "license": "MIT"
+}

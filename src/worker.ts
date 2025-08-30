@@ -283,7 +283,7 @@ export default {
         display: none !important;
       }
       #content-area {
-        padding: 35px 1em !important;
+        padding: 0 1em !important;
       }
       .thought-container {
         margin: 1em 0 !important;

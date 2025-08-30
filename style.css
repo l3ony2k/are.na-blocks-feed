@@ -35,6 +35,23 @@
     }
 }
 
+/* Explicit Light Mode - Use class on html element for global scope */
+html.theme-light {
+    --bg-color: #f0f0f0;
+    --text-color: #333;
+    --block-bg: #fff;
+    --block-border: #333;
+    --header-bg: #f0f0f0;
+    --header-border: #333;
+    --button-bg: #ddd;
+    --button-hover: #ccc;
+    --link-color: #0077cc;
+    --meta-color: #555;
+    --shadow-color: rgba(0, 0, 0, 0.2);
+    --code-bg: #e9e9e9;
+    --code-border: #ddd;
+}
+
 /* Explicit Dark Mode - Use class on html element for global scope */
 html.theme-dark {
     --bg-color: #111;
@@ -521,33 +538,81 @@ img {
     text-decoration: none;
 }
 
-/* --- Scrollbar Styling --- */
-/* Webkit browsers (Chrome, Safari, Edge) */
-::-webkit-scrollbar {
+/* --- Scrollbar Styling (ported) --- */
+
+/* Global defaults */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--block-border) var(--bg-color);
+}
+
+/* Dark modes supported by this project */
+body[data-theme="dark"],
+html.theme-dark {
+    color-scheme: dark;
+}
+
+/* WebKit */
+*::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
 
-::-webkit-scrollbar-track {
+*::-webkit-scrollbar-track {
     background: var(--bg-color);
 }
 
-::-webkit-scrollbar-thumb {
+*::-webkit-scrollbar-thumb {
     background: var(--block-border);
+    /* no border-radius per project rule */
 }
 
-::-webkit-scrollbar-thumb:hover {
+*::-webkit-scrollbar-thumb:hover {
     background: var(--text-color);
 }
 
-::-webkit-scrollbar-corner {
+*::-webkit-scrollbar-corner {
     background: var(--bg-color);
 }
 
-/* Firefox */
-html {
+/* Scoped to main scroll containers */
+#content-area,
+.scrollable-area,
+.window-content-area {
     scrollbar-width: thin;
-    scrollbar-color: var(--bg-color);
+    scrollbar-color: var(--block-border) var(--bg-color);
+}
+
+#content-area::-webkit-scrollbar,
+.scrollable-area::-webkit-scrollbar,
+.window-content-area::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+#content-area::-webkit-scrollbar-track,
+.scrollable-area::-webkit-scrollbar-track,
+.window-content-area::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+
+#content-area::-webkit-scrollbar-thumb,
+.scrollable-area::-webkit-scrollbar-thumb,
+.window-content-area::-webkit-scrollbar-thumb {
+    background: var(--block-border);
+    /* no border-radius per project rule */
+}
+
+#content-area::-webkit-scrollbar-thumb:hover,
+.scrollable-area::-webkit-scrollbar-thumb:hover,
+.window-content-area::-webkit-scrollbar-thumb:hover {
+    background: var(--text-color);
+}
+
+#content-area::-webkit-scrollbar-corner,
+.scrollable-area::-webkit-scrollbar-corner,
+.window-content-area::-webkit-scrollbar-corner {
+    background: var(--bg-color);
 }
 
 body {

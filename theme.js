@@ -1,13 +1,30 @@
 document.addEventListener('DOMContentLoaded', () => {
     const themeToggleButton = document.getElementById('theme-toggle-button');
     const body = document.body;
+    const htmlEl = document.documentElement;
 
     const themes = ['system', 'light', 'dark'];
     const storageKey = 'theme-preference';
 
     const applyTheme = (theme) => {
+        // Update button label
+        if (themeToggleButton) {
+            themeToggleButton.textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
+        }
+
+        // Store current mode on body for reference only
         body.setAttribute('data-theme', theme);
-        themeToggleButton.textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
+
+        // Toggle classes on html element
+        if (theme === 'system') {
+            htmlEl.classList.remove('theme-light', 'theme-dark'); // fall back to @media
+        } else if (theme === 'light') {
+            htmlEl.classList.add('theme-light');
+            htmlEl.classList.remove('theme-dark');
+        } else if (theme === 'dark') {
+            htmlEl.classList.add('theme-dark');
+            htmlEl.classList.remove('theme-light');
+        }
     };
 
     const savePreference = (theme) => {
@@ -23,16 +40,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const initialTheme = savedTheme || 'system';
     applyTheme(initialTheme);
 
-    // Handle button click
-    themeToggleButton.addEventListener('click', () => {
-        const currentTheme = body.getAttribute('data-theme');
-        const currentIndex = themes.indexOf(currentTheme);
-        const nextIndex = (currentIndex + 1) % themes.length;
-        const nextTheme = themes[nextIndex];
+    // Handle button click (only if button exists)
+    if (themeToggleButton) {
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme');
+            const currentIndex = themes.indexOf(currentTheme);
+            const nextIndex = (currentIndex + 1) % themes.length;
+            const nextTheme = themes[nextIndex];
 
-        applyTheme(nextTheme);
-        savePreference(nextTheme);
-    });
+            applyTheme(nextTheme);
+            savePreference(nextTheme);
+        });
+    }
 
     // Handle tooltip functionality
     const setupTooltips = () => {

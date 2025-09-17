@@ -256,7 +256,7 @@ export default {
     let html: string;
 
     if (isEmbed) {
-      // Create embed version without header, footer, and background
+      // Create embed version without header and footer
       html = `<!doctype html>
 <html>
   <head>
@@ -275,10 +275,6 @@ export default {
     <title>Leon's Journal - Embed</title>
     <style>
       /* Embed-specific overrides */
-      html, body {
-        background-image: none !important;
-        background-color: transparent !important;
-      }
       #header-bar, #footer-bar {
         display: none !important;
       }

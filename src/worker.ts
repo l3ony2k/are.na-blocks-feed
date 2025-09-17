@@ -275,7 +275,7 @@ export default {
     <title>Leon's Journal - Embed</title>
     <style>
       /* Embed-specific overrides */
-      body {
+      html, body {
         background-image: none !important;
         background-color: transparent !important;
       }

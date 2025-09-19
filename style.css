@@ -38,6 +38,7 @@
 /* Explicit Light Mode - Use class on html element for global scope */
 html.theme-light {
     --bg-color: #f0f0f0;
+    --dot-color: #cacaca;
     --text-color: #333;
     --block-bg: #fff;
     --block-border: #333;
@@ -55,6 +56,7 @@ html.theme-light {
 /* Explicit Dark Mode - Use class on html element for global scope */
 html.theme-dark {
     --bg-color: #111;
+    --dot-color: #333;
     --text-color: #f0f0f0;
     --block-bg: #1e1e1e;
     --block-border: #555;
@@ -83,7 +85,7 @@ body {
     font-family: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", "Oxygen Mono", "Ubuntu Mono", "Source Code Pro", "Fira Mono", "Droid Sans Mono", "Consolas", "Courier New", monospace;
     background-color: var(--bg-color);
     color: var(--text-color);
-    background-image: radial-gradient(circle, var(--block-border) 1px, transparent 1px);
+    background-image: radial-gradient(circle, var(--dot-color) 1px, transparent 1px);
     background-size: 20px 20px;
     background-attachment: fixed;
     margin: 0;

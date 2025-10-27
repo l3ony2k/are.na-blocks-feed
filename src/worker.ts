@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import templateHtml from '../index.html';
-import styleCss from '../style.css';
-import themeJs from '../theme.js';
+import templateHtml from "../index.html";
+import styleCss from "../style.css";
+import themeJs from "../theme.js";
 // @ts-ignore - WebP import handled by wrangler
-import ogImage from '../og.webp';
+import ogImage from "../og.webp";
 
 type Env = {
   CHANNEL_SLUG: string;
@@ -15,17 +15,12 @@ const CACHE_TTL = 300; // 5 minutes
 
 // Util: escape HTML entities to avoid injection
 function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
 // Util: format date as "YYYY-MM-DD @ HH:MM"
 function formatDate(date: Date): string {
-  const pad = (n: number) => (n < 10 ? '0' + n : n.toString());
+  const pad = (n: number) => (n < 10 ? "0" + n : n.toString());
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} @ ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
@@ -34,28 +29,28 @@ export default {
     const url = new URL(request.url);
 
     // Serve static assets directly from in-memory constants
-    if (url.pathname === '/style.css') {
+    if (url.pathname === "/style.css") {
       return new Response(styleCss, {
-        headers: { 'content-type': 'text/css; charset=utf-8', 'cache-control': 'public, max-age=31536000, immutable' },
+        headers: { "content-type": "text/css; charset=utf-8", "cache-control": "public, max-age=31536000, immutable" },
       });
     }
-    if (url.pathname === '/theme.js') {
+    if (url.pathname === "/theme.js") {
       return new Response(themeJs, {
-        headers: { 'content-type': 'application/javascript; charset=utf-8', 'cache-control': 'public, max-age=31536000, immutable' },
+        headers: { "content-type": "application/javascript; charset=utf-8", "cache-control": "public, max-age=31536000, immutable" },
       });
     }
-    if (url.pathname === '/og.webp') {
+    if (url.pathname === "/og.webp") {
       return new Response(ogImage, {
-        headers: { 'content-type': 'image/webp', 'cache-control': 'public, max-age=31536000, immutable' },
+        headers: { "content-type": "image/webp", "cache-control": "public, max-age=31536000, immutable" },
       });
     }
 
     // Check if this is an embed request
-    const isEmbed = url.pathname === '/embed';
+    const isEmbed = url.pathname === "/embed";
 
     // Only root path and /embed serve the page
-    if (url.pathname !== '/' && !isEmbed) {
-      return new Response('Not found', { status: 404 });
+    if (url.pathname !== "/" && !isEmbed) {
+      return new Response("Not found", { status: 404 });
     }
 
     // Try edge cache for rendered HTML first (separate cache for embed vs normal)
@@ -69,9 +64,9 @@ export default {
 
     // Fetch Are.na channel contents with pagination
     const slug = env.CHANNEL_SLUG;
-    const headers: Record<string, string> = { Accept: 'application/json' };
+    const headers: Record<string, string> = { Accept: "application/json" };
     if (env.ARENA_ACCESS_TOKEN) {
-      headers['Authorization'] = `Bearer ${env.ARENA_ACCESS_TOKEN}`;
+      headers["Authorization"] = `Bearer ${env.ARENA_ACCESS_TOKEN}`;
     }
 
     interface ArenaBlock {
@@ -146,7 +141,7 @@ export default {
     }
 
     // Parse all responses and combine contents
-    const pageDataPromises = pageResponses.map(resp => resp.json() as Promise<ArenaChannelResponse>);
+    const pageDataPromises = pageResponses.map((resp) => resp.json() as Promise<ArenaChannelResponse>);
     const allPageData = await Promise.all(pageDataPromises);
 
     // Combine all contents from all pages
@@ -156,31 +151,31 @@ export default {
     }
 
     const blocksHtml = allBlocks
-      .filter((b) => b.class === 'Text' || b.class === 'Media' || b.class === 'Image' || b.class === 'Link')
+      .filter((b) => b.class === "Text" || b.class === "Media" || b.class === "Image" || b.class === "Link")
       .sort((a, b) => b.position - a.position) // Sort by position: largest number first (top), smallest last
       .map((block) => {
         const date = new Date(block.created_at);
         const dateLabel = formatDate(date);
         const blockId = `${block.id}`;
 
-        let rendered = '';
-        if (block.class === 'Text') {
+        let rendered = "";
+        if (block.class === "Text") {
           // Use content_html if available, otherwise fall back to content with HTML escaping
           if (block.content_html) {
             // content_html is already safe HTML from Are.na
             rendered = block.content_html;
           } else {
-            const safe = block.content ? escapeHtml(block.content) : '';
+            const safe = block.content ? escapeHtml(block.content) : "";
             // Convert simple line breaks to <br>
-            rendered = `<p>${safe.replace(/\n/g, '<br>')}</p>`;
+            rendered = `<p>${safe.replace(/\n/g, "<br>")}</p>`;
           }
-        } else if (block.class === 'Image') {
+        } else if (block.class === "Image") {
           // Image rendering using the image field
           const altText = block.content ? escapeHtml(block.content) : `Are.na block ${block.id}`;
           if (block.image && block.image.display && block.image.display.url) {
             rendered = `<img src="${block.image.display.url}" alt="${altText}" style="max-width:100%; height:auto;"/>`;
           }
-        } else if (block.class === 'Media') {
+        } else if (block.class === "Media") {
           // Media rendering - prioritize embed HTML for videos, fallback to image
           if (block.embed && block.embed.html) {
             // Use the embed HTML directly (it's already an iframe from Are.na)
@@ -202,19 +197,19 @@ export default {
             const altText = block.content ? escapeHtml(block.content) : `Are.na block ${block.id}`;
             rendered = `<img src="${block.source.url}" alt="${altText}" style="max-width:100%; height:auto;"/>`;
           }
-        } else if (block.class === 'Link') {
-          let thumbHtml = '';
+        } else if (block.class === "Link") {
+          let thumbHtml = "";
           if (block.image && block.image.thumb && block.image.thumb.url) {
-            const altText = block.title ? escapeHtml(block.title) : '';
+            const altText = block.title ? escapeHtml(block.title) : "";
             thumbHtml = `<img src="${block.image.thumb.url}" alt="${altText}" class="link-thumb"/>`;
           }
 
-          let descriptionHtml = '';
+          let descriptionHtml = "";
           if (block.description_html) {
             descriptionHtml = `<div class="link-description">${block.description_html}</div>`;
           }
 
-          let buttonHtml = '';
+          let buttonHtml = "";
           if (block.source && block.source.url) {
             buttonHtml = `<a href="${block.source.url}" target="_blank" rel="noopener" class="link-button">Go to original</a>`;
           }
@@ -229,7 +224,7 @@ export default {
         }
 
         // Generate title element if title exists
-        let titleElement = '';
+        let titleElement = "";
         if (block.title && block.title.trim()) {
           const titleHtml = escapeHtml(block.title.trim());
           if (block.description_html && block.description_html.trim()) {
@@ -251,7 +246,7 @@ export default {
                   <div class="thought-content">${rendered}</div>
                 </section>`;
       })
-      .join('\n');
+      .join("\n");
 
     let html: string;
 
@@ -280,6 +275,8 @@ export default {
       }
       #content-area {
         padding: 0 1em !important;
+        top: 0;
+        bottom: 0;
       }
       .thought-container {
         margin: 1em 0 !important;
@@ -297,13 +294,13 @@ export default {
 </html>`;
     } else {
       // Normal version
-      html = templateHtml.replace('<!--THOUGHTS-->', blocksHtml);
+      html = templateHtml.replace("<!--THOUGHTS-->", blocksHtml);
     }
 
     const response = new Response(html, {
       headers: {
-        'content-type': 'text/html; charset=utf-8',
-        'cache-control': `public, max-age=${CACHE_TTL}`,
+        "content-type": "text/html; charset=utf-8",
+        "cache-control": `public, max-age=${CACHE_TTL}`,
       },
     });
 
@@ -312,4 +309,4 @@ export default {
     ctx.waitUntil(cache.put(cacheKey, response.clone()));
     return response;
   },
-}; 
+};

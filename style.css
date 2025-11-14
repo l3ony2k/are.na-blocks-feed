@@ -179,13 +179,39 @@ body {
 /* Inner content container for centering and max-width */
 .content-inner {
     max-width: 50em;
-    margin: 0 auto;
+   margin: 0 auto;
     padding: 0 1em;
+}
+
+#infinite-loader {
+    text-align: center;
+    padding: 1.5em 0 3em;
+    font-size: 0.85rem;
+    color: var(--meta-color);
+    display: none;
+}
+
+#infinite-loader.active {
+    display: block;
+}
+
+#infinite-loader.error {
+    color: #d26464;
+}
+
+#pagination-sentinel {
+    width: 100%;
+    height: 1px;
 }
 
 /* --- Thought Block Styling --- */
 .thought-container {
     margin: 1.5em 0;
+}
+
+.thought-container:target {
+    outline: 2px solid var(--link-color);
+    outline-offset: 4px;
 }
 
 .thought-header {

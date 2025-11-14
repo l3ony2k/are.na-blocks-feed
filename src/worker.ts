@@ -171,7 +171,13 @@ async function fetchChannelPage(
   perPage: number,
   headers: Record<string, string>
 ): Promise<ArenaChannelResponse> {
-  const apiUrl = `https://api.are.na/v2/channels/${encodeURIComponent(slug)}?per=${perPage}&page=${page}`;
+  const searchParams = new URLSearchParams({
+    per: String(perPage),
+    page: String(page),
+    sort: "position",
+    direction: "desc",
+  });
+  const apiUrl = `https://api.are.na/v2/channels/${encodeURIComponent(slug)}?${searchParams.toString()}`;
   const response = await fetch(apiUrl, {
     headers,
     // @ts-ignore - Cloudflare-specific property

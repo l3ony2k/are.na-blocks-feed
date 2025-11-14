@@ -63,10 +63,40 @@ function formatDate(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} @ ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-function filterAndSortBlocks(blocks: ArenaBlock[]): ArenaBlock[] {
-  return blocks
-    .filter((b) => ALLOWED_CLASSES.has(b.class))
-    .sort((a, b) => b.position - a.position);
+function normalizeBlocks(blocks: ArenaBlock[]): ArenaBlock[] {
+  const seen = new Set<number>();
+  const filtered: ArenaBlock[] = [];
+
+  for (const block of blocks) {
+    if (!block || !ALLOWED_CLASSES.has(block.class)) {
+      continue;
+    }
+
+    if (seen.has(block.id)) {
+      continue;
+    }
+
+    seen.add(block.id);
+    filtered.push(block);
+  }
+
+  filtered.sort((a, b) => {
+    const positionA = typeof a.position === "number" ? a.position : -Infinity;
+    const positionB = typeof b.position === "number" ? b.position : -Infinity;
+    if (positionA !== positionB) {
+      return positionB - positionA;
+    }
+
+    const createdA = new Date(a.created_at).getTime();
+    const createdB = new Date(b.created_at).getTime();
+    if (createdA !== createdB) {
+      return createdB - createdA;
+    }
+
+    return b.id - a.id;
+  });
+
+  return filtered;
 }
 
 function renderBlock(block: ArenaBlock): string {
@@ -150,21 +180,6 @@ function renderBlocksHtml(blocks: ArenaBlock[]): string {
   return blocks.map(renderBlock).join("\n");
 }
 
-async function fetchChannelInfo(slug: string, headers: Record<string, string>): Promise<ArenaChannelResponse> {
-  const channelInfoUrl = `https://api.are.na/v2/channels/${encodeURIComponent(slug)}`;
-  const response = await fetch(channelInfoUrl, {
-    headers,
-    // @ts-ignore - Cloudflare-specific property
-    cf: { cacheTtl: CACHE_TTL, cacheEverything: true },
-  } as RequestInit);
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch Are.na channel info: ${response.status}`);
-  }
-
-  return (await response.json()) as ArenaChannelResponse;
-}
-
 async function fetchChannelPage(
   slug: string,
   page: number,
@@ -191,34 +206,53 @@ async function fetchChannelPage(
   return (await response.json()) as ArenaChannelResponse;
 }
 
-async function fetchBlocksForPage(
-  slug: string,
-  page: number,
-  perPage: number,
-  headers: Record<string, string>
-): Promise<ArenaBlock[]> {
-  const pageData = await fetchChannelPage(slug, page, perPage, headers);
-  return filterAndSortBlocks(pageData.contents);
-}
+async function fetchAllChannelBlocks(slug: string, headers: Record<string, string>): Promise<ArenaBlock[]> {
+  const firstPage = await fetchChannelPage(slug, 1, ARENA_PAGE_LIMIT, headers);
+  const totalLength = firstPage.length ?? firstPage.contents.length ?? 0;
+  const totalPages = totalLength > 0 ? Math.ceil(totalLength / ARENA_PAGE_LIMIT) : 1;
 
-async function fetchAllBlocks(
-  slug: string,
-  totalPages: number,
-  perPage: number,
-  headers: Record<string, string>
-): Promise<ArenaBlock[]> {
-  const pagePromises: Promise<ArenaChannelResponse>[] = [];
-  for (let page = 1; page <= totalPages; page++) {
-    pagePromises.push(fetchChannelPage(slug, page, perPage, headers));
+  if (totalPages === 1) {
+    return normalizeBlocks(firstPage.contents);
   }
 
-  const pageResponses = await Promise.all(pagePromises);
-  const combined: ArenaBlock[] = [];
-  for (const response of pageResponses) {
+  const remainingPromises: Promise<ArenaChannelResponse>[] = [];
+  for (let page = 2; page <= totalPages; page++) {
+    remainingPromises.push(fetchChannelPage(slug, page, ARENA_PAGE_LIMIT, headers));
+  }
+
+  const remainingResponses = await Promise.all(remainingPromises);
+  const combined: ArenaBlock[] = [...firstPage.contents];
+  for (const response of remainingResponses) {
     combined.push(...response.contents);
   }
 
-  return filterAndSortBlocks(combined);
+  return normalizeBlocks(combined);
+}
+
+interface PaginatedBlocks {
+  blocks: ArenaBlock[];
+  totalBlocks: number;
+  totalPages: number;
+}
+
+async function fetchPaginatedBlocks(
+  slug: string,
+  page: number,
+  pageSize: number,
+  headers: Record<string, string>
+): Promise<PaginatedBlocks> {
+  const allBlocks = await fetchAllChannelBlocks(slug, headers);
+  const totalBlocks = allBlocks.length;
+  const totalPages = totalBlocks > 0 ? Math.ceil(totalBlocks / pageSize) : 1;
+
+  if (page > totalPages) {
+    return { blocks: [], totalBlocks, totalPages };
+  }
+
+  const startIndex = (page - 1) * pageSize;
+  const pageBlocks = startIndex < totalBlocks ? allBlocks.slice(startIndex, startIndex + pageSize) : [];
+
+  return { blocks: pageBlocks, totalBlocks, totalPages };
 }
 
 function createConfigJson(totalBlocks: number, totalPages: number, pageSize: number): string {
@@ -309,7 +343,12 @@ export default {
       }
 
       try {
-        const blocks = await fetchBlocksForPage(slug, pageNumber, Math.min(PAGE_SIZE, ARENA_PAGE_LIMIT), headers);
+        const { blocks, totalPages } = await fetchPaginatedBlocks(slug, pageNumber, PAGE_SIZE, headers);
+
+        if (pageNumber > totalPages) {
+          return jsonResponse({ error: "Page out of range" }, 404);
+        }
+
         const html = renderBlocksHtml(blocks);
         const response = jsonResponse({ html });
         // @ts-ignore - ExecutionContext typing is minimal
@@ -333,14 +372,15 @@ export default {
     }
 
     try {
-      const channelInfo = await fetchChannelInfo(slug, headers);
-      const totalBlocks = channelInfo.length;
-
-      const perPage = Math.min(PAGE_SIZE, ARENA_PAGE_LIMIT);
-      const totalPages = totalBlocks > 0 ? Math.ceil(totalBlocks / perPage) : 1;
+      const perPage = PAGE_SIZE;
+      const { blocks: initialBlocks, totalBlocks, totalPages } = await fetchPaginatedBlocks(
+        slug,
+        1,
+        perPage,
+        headers,
+      );
 
       if (isEmbed) {
-        const initialBlocks = await fetchBlocksForPage(slug, 1, perPage, headers);
         const blocksHtml = renderBlocksHtml(initialBlocks);
         const configJson = createConfigJson(totalBlocks, totalPages, perPage);
 
@@ -398,7 +438,6 @@ export default {
         return response;
       }
 
-      const initialBlocks = await fetchBlocksForPage(slug, 1, perPage, headers);
       const blocksHtml = renderBlocksHtml(initialBlocks);
       const configJson = createConfigJson(totalBlocks, totalPages, perPage);
 

@@ -185,7 +185,7 @@ body {
 
 #infinite-loader {
     text-align: center;
-    padding: 1.5em 0;
+    padding: 1.5em 0 3em;
     font-size: 0.85rem;
     color: var(--meta-color);
     display: none;

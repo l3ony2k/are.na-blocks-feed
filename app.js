@@ -47,17 +47,17 @@
     let observer = null;
     let loadingPromise = null;
 
-    const loader = document.createElement("div");
-    loader.id = "infinite-loader";
-    loader.textContent = DEFAULT_LOADER_TEXT;
-
     const sentinel = document.createElement("div");
     sentinel.id = "pagination-sentinel";
     sentinel.setAttribute("aria-hidden", "true");
 
+    const loader = document.createElement("div");
+    loader.id = "infinite-loader";
+    loader.textContent = DEFAULT_LOADER_TEXT;
+
     if (shouldPaginate) {
-      inner.appendChild(loader);
       inner.appendChild(sentinel);
+      inner.appendChild(loader);
     }
 
     const setLoaderVisible = (visible) => {

@@ -337,10 +337,11 @@ export default {
       const totalBlocks = channelInfo.length;
 
       if (isEmbed) {
-        const perPage = Math.min(ARENA_PAGE_LIMIT, 100);
+        const perPage = Math.min(PAGE_SIZE, ARENA_PAGE_LIMIT);
         const totalPages = totalBlocks > 0 ? Math.ceil(totalBlocks / perPage) : 1;
-        const blocks = await fetchAllBlocks(slug, totalPages, perPage, headers);
-        const blocksHtml = renderBlocksHtml(blocks);
+        const initialBlocks = await fetchBlocksForPage(slug, 1, perPage, headers);
+        const blocksHtml = renderBlocksHtml(initialBlocks);
+        const configJson = createConfigJson(totalBlocks, totalPages, perPage);
 
         const html = `<!doctype html>
 <html>
@@ -378,7 +379,9 @@ export default {
         ${blocksHtml}
       </div>
     </main>
+    <script id="blocks-config" type="application/json">${configJson}</script>
     <script src="/theme.js"></script>
+    <script src="/app.js"></script>
   </body>
 </html>`;
 

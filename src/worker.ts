@@ -206,27 +206,53 @@ async function fetchChannelPage(
   return (await response.json()) as ArenaChannelResponse;
 }
 
-async function fetchAllChannelBlocks(slug: string, headers: Record<string, string>): Promise<ArenaBlock[]> {
-  const firstPage = await fetchChannelPage(slug, 1, ARENA_PAGE_LIMIT, headers);
-  const totalLength = firstPage.length ?? firstPage.contents.length ?? 0;
-  const totalPages = totalLength > 0 ? Math.ceil(totalLength / ARENA_PAGE_LIMIT) : 1;
+async function gatherBlocksUpTo(
+  slug: string,
+  headers: Record<string, string>,
+  minimumCount: number,
+): Promise<{
+  blocks: ArenaBlock[];
+  totalBlocks: number;
+  exhausted: boolean;
+}> {
+  const combined: ArenaBlock[] = [];
+  let totalBlocks = 0;
+  let totalArenaPages = 1;
+  let exhausted = false;
+  let normalized: ArenaBlock[] = [];
 
-  if (totalPages === 1) {
-    return normalizeBlocks(firstPage.contents);
-  }
+  for (let page = 1; ; page++) {
+    if (page > 1 && totalBlocks > 0 && page > totalArenaPages) {
+      exhausted = true;
+      return {
+        blocks: normalized,
+        totalBlocks,
+        exhausted,
+      };
+    }
 
-  const remainingPromises: Promise<ArenaChannelResponse>[] = [];
-  for (let page = 2; page <= totalPages; page++) {
-    remainingPromises.push(fetchChannelPage(slug, page, ARENA_PAGE_LIMIT, headers));
-  }
+    const response = await fetchChannelPage(slug, page, ARENA_PAGE_LIMIT, headers);
 
-  const remainingResponses = await Promise.all(remainingPromises);
-  const combined: ArenaBlock[] = [...firstPage.contents];
-  for (const response of remainingResponses) {
+    if (page === 1) {
+      totalBlocks = response.length ?? response.contents.length ?? 0;
+      totalArenaPages = totalBlocks > 0 ? Math.max(1, Math.ceil(totalBlocks / ARENA_PAGE_LIMIT)) : 1;
+    }
+
     combined.push(...response.contents);
-  }
+    normalized = normalizeBlocks(combined);
 
-  return normalizeBlocks(combined);
+    const reachedTarget = normalized.length >= minimumCount;
+    const reachedEnd = page >= totalArenaPages || response.contents.length === 0;
+
+    if (reachedTarget || reachedEnd) {
+      exhausted = reachedEnd;
+      return {
+        blocks: normalized,
+        totalBlocks,
+        exhausted,
+      };
+    }
+  }
 }
 
 interface PaginatedBlocks {
@@ -241,18 +267,25 @@ async function fetchPaginatedBlocks(
   pageSize: number,
   headers: Record<string, string>
 ): Promise<PaginatedBlocks> {
-  const allBlocks = await fetchAllChannelBlocks(slug, headers);
-  const totalBlocks = allBlocks.length;
-  const totalPages = totalBlocks > 0 ? Math.ceil(totalBlocks / pageSize) : 1;
+  const targetCount = page * pageSize;
+  const { blocks: normalized, totalBlocks, exhausted } = await gatherBlocksUpTo(
+    slug,
+    headers,
+    targetCount,
+  );
+
+  const derivedTotalBlocks = exhausted && normalized.length < totalBlocks ? normalized.length : totalBlocks;
+  const effectiveTotalBlocks = derivedTotalBlocks || normalized.length;
+  const totalPages = effectiveTotalBlocks > 0 ? Math.max(1, Math.ceil(effectiveTotalBlocks / pageSize)) : 1;
 
   if (page > totalPages) {
-    return { blocks: [], totalBlocks, totalPages };
+    return { blocks: [], totalBlocks: effectiveTotalBlocks, totalPages };
   }
 
   const startIndex = (page - 1) * pageSize;
-  const pageBlocks = startIndex < totalBlocks ? allBlocks.slice(startIndex, startIndex + pageSize) : [];
+  const pageBlocks = normalized.slice(startIndex, startIndex + pageSize);
 
-  return { blocks: pageBlocks, totalBlocks, totalPages };
+  return { blocks: pageBlocks, totalBlocks: effectiveTotalBlocks, totalPages };
 }
 
 function createConfigJson(totalBlocks: number, totalPages: number, pageSize: number): string {

@@ -310,27 +310,40 @@
       return loadingPromise;
     }
 
-    // Initial load: fetch channel info, then first page
+    // Initial load: fetch channel info + first page together, then render
     (async function () {
       try {
+        // Step 1: Get channel info to know total block count
         var channelInfo = await fetchChannelInfo(slug, headers);
         var totalBlocks = channelInfo.length || 0;
         totalPages = totalBlocks > 0 ? Math.ceil(totalBlocks / pageSize) : 1;
 
-        // Remove the initial loader
+        // Step 2: Fetch first page of blocks
+        var firstPageData = await fetchChannelPage(slug, 1, pageSize, headers);
+        var firstBlocks = filterAndSortBlocks(firstPageData.contents || []);
+        var firstHtml = renderBlocksHtml(firstBlocks);
+        currentPage = 1;
+
+        // Step 3: Swap loading indicator for actual content in one go
         if (initialLoader) {
           initialLoader.remove();
         }
 
-        // Set up pagination elements
-        inner.appendChild(sentinel);
-        inner.appendChild(loader);
+        if (firstHtml.trim()) {
+          var template = document.createElement("template");
+          template.innerHTML = firstHtml;
+          inner.appendChild(template.content);
+        }
 
-        // Load first page
-        await loadNextPage();
+        if (typeof window.initializeThoughtEnhancements === "function") {
+          window.initializeThoughtEnhancements();
+        }
 
-        // Set up infinite scroll if more pages
+        // Step 4: Only set up pagination if there are more pages
         if (totalPages > 1) {
+          inner.appendChild(sentinel);
+          inner.appendChild(loader);
+
           observer = new IntersectionObserver(
             function (entries) {
               entries.forEach(function (entry) {

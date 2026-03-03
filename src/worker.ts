@@ -13,233 +13,16 @@ type Env = {
 
 const CACHE_TTL = 300; // 5 minutes
 const PAGE_SIZE = 40; // Blocks per page for the main feed
-const ARENA_PAGE_LIMIT = 100; // Are.na API maximum page size
 
-interface ArenaBlock {
-  id: number;
-  created_at: string;
-  position: number;
-  class: string;
-  content?: string;
-  content_html?: string;
-  title?: string;
-  description?: string;
-  description_html?: string;
-  source?: { url: string };
-  image?: {
-    display: { url: string };
-    large: { url: string };
-    original: { url: string };
-    thumb?: { url: string };
-  };
-  embed?: {
-    html: string;
-    type: string;
-    title?: string;
-    author_name?: string;
-    width?: number;
-    height?: number;
-  };
-}
-
-interface ArenaChannelResponse {
-  contents: ArenaBlock[];
-  length: number;
-}
-
-const ALLOWED_CLASSES = new Set(["Text", "Media", "Image", "Link"]);
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
-function formatDate(date: Date): string {
-  const pad = (n: number) => (n < 10 ? "0" + n : n.toString());
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} @ ${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-
-function filterAndSortBlocks(blocks: ArenaBlock[]): ArenaBlock[] {
-  return blocks
-    .filter((b) => ALLOWED_CLASSES.has(b.class))
-    .sort((a, b) => b.position - a.position);
-}
-
-function renderBlock(block: ArenaBlock): string {
-  const date = new Date(block.created_at);
-  const dateLabel = formatDate(date);
-  const blockId = `${block.id}`;
-
-  let rendered = "";
-
-  if (block.class === "Text") {
-    if (block.content_html) {
-      rendered = block.content_html;
-    } else {
-      const safe = block.content ? escapeHtml(block.content) : "";
-      rendered = `<p>${safe.replace(/\n/g, "<br>")}</p>`;
-    }
-  } else if (block.class === "Image") {
-    const altText = block.content ? escapeHtml(block.content) : `Are.na block ${block.id}`;
-    if (block.image && block.image.display && block.image.display.url) {
-      rendered = `<img src="${block.image.display.url}" alt="${altText}" style="max-width:100%; height:auto;"/>`;
-    }
-  } else if (block.class === "Media") {
-    if (block.embed && block.embed.html) {
-      rendered = `<div class="embed-container">${block.embed.html}</div>`;
-    } else if (block.image && block.image.display && block.image.display.url) {
-      const altText = block.content ? escapeHtml(block.content) : `Are.na block ${block.id}`;
-      rendered = `<img src="${block.image.display.url}" alt="${altText}" style="max-width:100%; height:auto;"/>`;
-    } else if (block.source && block.source.url) {
-      const altText = block.content ? escapeHtml(block.content) : `Are.na block ${block.id}`;
-      rendered = `<img src="${block.source.url}" alt="${altText}" style="max-width:100%; height:auto;"/>`;
-    }
-  } else if (block.class === "Link") {
-    let thumbHtml = "";
-    if (block.image && block.image.thumb && block.image.thumb.url) {
-      const altText = block.title ? escapeHtml(block.title) : "";
-      thumbHtml = `<img src="${block.image.thumb.url}" alt="${altText}" class="link-thumb"/>`;
-    }
-
-    let descriptionHtml = "";
-    if (block.description_html) {
-      descriptionHtml = `<div class="link-description">${block.description_html}</div>`;
-    }
-
-    let buttonHtml = "";
-    if (block.source && block.source.url) {
-      buttonHtml = `<a href="${block.source.url}" target="_blank" rel="noopener" class="link-button">Go to original</a>`;
-    }
-
-    rendered = `<div class="link-container">
-                    ${thumbHtml}
-                    <div class="link-main">
-                      ${descriptionHtml}
-                      ${buttonHtml}
-                    </div>
-                  </div>`;
-  }
-
-  let titleElement = "";
-  if (block.title && block.title.trim()) {
-    const titleHtml = escapeHtml(block.title.trim());
-    if (block.description_html && block.description_html.trim()) {
-      const tooltipId = `tooltip-${block.id}`;
-      titleElement =
-        `<div class="thought-title" data-tooltip-id="${tooltipId}">${titleHtml}</div>` +
-        `<div class="tooltip-content" id="${tooltipId}" style="display: none;">${block.description_html}</div>`;
-    } else {
-      titleElement = `<div class="thought-title">${titleHtml}</div>`;
-    }
-  }
-
-  return `<section class="thought-container" id="${blockId}" data-type="${block.class.toLowerCase()}">
-            <div class="thought-header">
-              <div class="thought-date"><a class="thought-date" href="#${blockId}">${dateLabel}</a></div>
-              ${titleElement}
-            </div>
-            <div class="thought-content">${rendered}</div>
-          </section>`;
-}
-
-function renderBlocksHtml(blocks: ArenaBlock[]): string {
-  return blocks.map(renderBlock).join("\n");
-}
-
-async function fetchChannelInfo(slug: string, headers: Record<string, string>): Promise<ArenaChannelResponse> {
-  const channelInfoUrl = `https://api.are.na/v2/channels/${encodeURIComponent(slug)}`;
-  const response = await fetch(channelInfoUrl, {
-    headers,
-    // @ts-ignore - Cloudflare-specific property
-    cf: { cacheTtl: CACHE_TTL, cacheEverything: true },
-  } as RequestInit);
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch Are.na channel info: ${response.status}`);
-  }
-
-  return (await response.json()) as ArenaChannelResponse;
-}
-
-async function fetchChannelPage(
-  slug: string,
-  page: number,
-  perPage: number,
-  headers: Record<string, string>
-): Promise<ArenaChannelResponse> {
-  const searchParams = new URLSearchParams({
-    per: String(perPage),
-    page: String(page),
-    sort: "position",
-    direction: "desc",
-  });
-  const apiUrl = `https://api.are.na/v2/channels/${encodeURIComponent(slug)}?${searchParams.toString()}`;
-  const response = await fetch(apiUrl, {
-    headers,
-    // @ts-ignore - Cloudflare-specific property
-    cf: { cacheTtl: CACHE_TTL, cacheEverything: true },
-  } as RequestInit);
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch Are.na channel page: ${response.status}`);
-  }
-
-  return (await response.json()) as ArenaChannelResponse;
-}
-
-async function fetchBlocksForPage(
-  slug: string,
-  page: number,
-  perPage: number,
-  headers: Record<string, string>
-): Promise<ArenaBlock[]> {
-  const pageData = await fetchChannelPage(slug, page, perPage, headers);
-  return filterAndSortBlocks(pageData.contents);
-}
-
-async function fetchAllBlocks(
-  slug: string,
-  totalPages: number,
-  perPage: number,
-  headers: Record<string, string>
-): Promise<ArenaBlock[]> {
-  const pagePromises: Promise<ArenaChannelResponse>[] = [];
-  for (let page = 1; page <= totalPages; page++) {
-    pagePromises.push(fetchChannelPage(slug, page, perPage, headers));
-  }
-
-  const pageResponses = await Promise.all(pagePromises);
-  const combined: ArenaBlock[] = [];
-  for (const response of pageResponses) {
-    combined.push(...response.contents);
-  }
-
-  return filterAndSortBlocks(combined);
-}
-
-function createConfigJson(totalBlocks: number, totalPages: number, pageSize: number): string {
-  const config = {
-    totalBlocks,
-    totalPages,
+function createConfigJson(slug: string, pageSize: number, token?: string): string {
+  const config: Record<string, unknown> = {
+    channelSlug: slug,
     pageSize,
-    initialPage: 1,
   };
-
+  if (token) {
+    config.accessToken = token;
+  }
   return JSON.stringify(config).replace(/</g, "\\u003c");
-}
-
-function jsonResponse(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      "content-type": "application/json; charset=utf-8",
-      "cache-control": `public, max-age=${CACHE_TTL}`,
-    },
-  });
 }
 
 export default {
@@ -282,74 +65,15 @@ export default {
       });
     }
 
-    if (url.pathname !== "/" && url.pathname !== "/embed" && url.pathname !== "/api/blocks") {
+    if (url.pathname !== "/" && url.pathname !== "/embed") {
       return new Response("Not found", { status: 404 });
     }
 
-    const cacheKey = new Request(request.url, request);
-    const cache = (caches as any).default as Cache;
-
-    // API endpoint for paginated HTML snippets
-    if (url.pathname === "/api/blocks") {
-      const cachedApiResponse = await cache.match(cacheKey);
-      if (cachedApiResponse) {
-        return cachedApiResponse;
-      }
-
-      const pageParam = url.searchParams.get("page");
-      const pageNumber = pageParam ? parseInt(pageParam, 10) : NaN;
-      if (!pageNumber || pageNumber < 1) {
-        return jsonResponse({ error: "Invalid page" }, 400);
-      }
-
-      const slug = env.CHANNEL_SLUG;
-      const headers: Record<string, string> = {
-        Accept: "application/json",
-        "User-Agent": "arena-blocks-feed/1.0"
-      };
-      if (env.ARENA_ACCESS_TOKEN) {
-        headers["Authorization"] = `Bearer ${env.ARENA_ACCESS_TOKEN}`;
-      }
-
-      try {
-        const blocks = await fetchBlocksForPage(slug, pageNumber, Math.min(PAGE_SIZE, ARENA_PAGE_LIMIT), headers);
-        const html = renderBlocksHtml(blocks);
-        const response = jsonResponse({ html });
-        // @ts-ignore - ExecutionContext typing is minimal
-        ctx.waitUntil(cache.put(cacheKey, response.clone()));
-        return response;
-      } catch (error: any) {
-        return jsonResponse({ error: `Failed to load blocks: ${error.message}\nYou can visit the original channel on Are.na: https://www.are.na/channel/${slug}` }, 500);
-      }
-    }
-
-    const isEmbed = url.pathname === "/embed";
-    const cachedResponse = await cache.match(cacheKey);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-
     const slug = env.CHANNEL_SLUG;
-    const headers: Record<string, string> = {
-      Accept: "application/json",
-      "User-Agent": "arena-blocks-feed/1.0"
-    };
-    if (env.ARENA_ACCESS_TOKEN) {
-      headers["Authorization"] = `Bearer ${env.ARENA_ACCESS_TOKEN}`;
-    }
+    const configJson = createConfigJson(slug, PAGE_SIZE, env.ARENA_ACCESS_TOKEN);
 
-    try {
-      const channelInfo = await fetchChannelInfo(slug, headers);
-      const totalBlocks = channelInfo.length;
-
-      if (isEmbed) {
-        const perPage = Math.min(PAGE_SIZE, ARENA_PAGE_LIMIT);
-        const totalPages = totalBlocks > 0 ? Math.ceil(totalBlocks / perPage) : 1;
-        const initialBlocks = await fetchBlocksForPage(slug, 1, perPage, headers);
-        const blocksHtml = renderBlocksHtml(initialBlocks);
-        const configJson = createConfigJson(totalBlocks, totalPages, perPage);
-
-        const html = `<!doctype html>
+    if (url.pathname === "/embed") {
+      const html = `<!doctype html>
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -382,7 +106,7 @@ export default {
   <body data-theme="system">
     <main id="content-area">
       <div class="content-inner">
-        ${blocksHtml}
+        <div id="initial-loader" class="initial-loader">Loading...</div>
       </div>
     </main>
     <script id="blocks-config" type="application/json">${configJson}</script>
@@ -391,39 +115,22 @@ export default {
   </body>
 </html>`;
 
-        const response = new Response(html, {
-          headers: {
-            "content-type": "text/html; charset=utf-8",
-            "cache-control": `public, max-age=${CACHE_TTL}`,
-          },
-        });
-
-        // @ts-ignore - ExecutionContext typing is minimal
-        ctx.waitUntil(cache.put(cacheKey, response.clone()));
-        return response;
-      }
-
-      const perPage = Math.min(PAGE_SIZE, ARENA_PAGE_LIMIT);
-      const totalPages = totalBlocks > 0 ? Math.ceil(totalBlocks / perPage) : 1;
-      const initialBlocks = await fetchBlocksForPage(slug, 1, perPage, headers);
-      const blocksHtml = renderBlocksHtml(initialBlocks);
-      const configJson = createConfigJson(totalBlocks, totalPages, perPage);
-
-      let html = templateHtml.replace("<!--THOUGHTS-->", blocksHtml);
-      html = html.replace("__BLOCKS_CONFIG__", configJson);
-
-      const response = new Response(html, {
+      return new Response(html, {
         headers: {
           "content-type": "text/html; charset=utf-8",
           "cache-control": `public, max-age=${CACHE_TTL}`,
         },
       });
-
-      // @ts-ignore - ExecutionContext typing is minimal
-      ctx.waitUntil(cache.put(cacheKey, response.clone()));
-      return response;
-    } catch (error: any) {
-      return new Response(`Failed to load channel: ${error.message}\nYou can visit the original channel on Are.na: https://www.are.na/channel/${slug}`, { status: 500 });
     }
+
+    // Main page (/)
+    let html = templateHtml.replace("__BLOCKS_CONFIG__", configJson);
+
+    return new Response(html, {
+      headers: {
+        "content-type": "text/html; charset=utf-8",
+        "cache-control": `public, max-age=${CACHE_TTL}`,
+      },
+    });
   },
 };

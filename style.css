@@ -204,6 +204,26 @@ body {
     height: 1px;
 }
 
+/* Initial loading / error state */
+.initial-loader {
+    text-align: center;
+    padding: 3em 1em;
+    font-size: 0.9rem;
+    color: var(--meta-color);
+}
+
+.initial-error {
+    text-align: center;
+    padding: 3em 1em;
+    font-size: 0.9rem;
+    color: #d26464;
+    line-height: 1.6;
+}
+
+.initial-error a {
+    color: var(--link-color);
+}
+
 /* --- Thought Block Styling --- */
 .thought-container {
     margin: 1.5em 0;

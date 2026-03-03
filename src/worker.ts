@@ -303,7 +303,10 @@ export default {
       }
 
       const slug = env.CHANNEL_SLUG;
-      const headers: Record<string, string> = { Accept: "application/json" };
+      const headers: Record<string, string> = {
+        Accept: "application/json",
+        "User-Agent": "arena-blocks-feed/1.0"
+      };
       if (env.ARENA_ACCESS_TOKEN) {
         headers["Authorization"] = `Bearer ${env.ARENA_ACCESS_TOKEN}`;
       }
@@ -315,8 +318,8 @@ export default {
         // @ts-ignore - ExecutionContext typing is minimal
         ctx.waitUntil(cache.put(cacheKey, response.clone()));
         return response;
-      } catch (error) {
-        return jsonResponse({ error: "Failed to load blocks" }, 500);
+      } catch (error: any) {
+        return jsonResponse({ error: `Failed to load blocks: ${error.message}\nYou can visit the original channel on Are.na: https://www.are.na/channel/${slug}` }, 500);
       }
     }
 
@@ -327,7 +330,10 @@ export default {
     }
 
     const slug = env.CHANNEL_SLUG;
-    const headers: Record<string, string> = { Accept: "application/json" };
+    const headers: Record<string, string> = {
+      Accept: "application/json",
+      "User-Agent": "arena-blocks-feed/1.0"
+    };
     if (env.ARENA_ACCESS_TOKEN) {
       headers["Authorization"] = `Bearer ${env.ARENA_ACCESS_TOKEN}`;
     }
@@ -416,8 +422,8 @@ export default {
       // @ts-ignore - ExecutionContext typing is minimal
       ctx.waitUntil(cache.put(cacheKey, response.clone()));
       return response;
-    } catch (error) {
-      return new Response("Failed to load channel", { status: 500 });
+    } catch (error: any) {
+      return new Response(`Failed to load channel: ${error.message}\nYou can visit the original channel on Are.na: https://www.are.na/channel/${slug}`, { status: 500 });
     }
   },
 };

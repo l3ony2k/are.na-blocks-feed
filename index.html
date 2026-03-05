@@ -1,69 +1,81 @@
 <!doctype html>
 <html>
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta http-equiv="Cache-Control" content="no-store">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    <!-- favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><style>.s{stroke:black}@media(prefers-color-scheme:dark){.s{stroke:white}}</style><rect class='s' x='5' y='5' width='90' height='90' fill='transparent' stroke-width='10'/></svg>">
-    <meta name="apple-mobile-web-app-title" content="LJ" />
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F0F0F0" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1A1A1A" />
 
-    <!-- open graph -->
-    <meta property="og:title" content="Leon's Journal" />
-    <meta property="og:description" content="A page of things in my mind." />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Leon's Journal" />
-    <meta property="og:image" content="/og.webp">
-    
-    <link rel="stylesheet" type="text/css" href="/style.css">
-    <title>Leon's Journal</title>
-  </head>
-  <body data-theme="system">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Cache-Control" content="no-store">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <header id="header-bar">
-      <div id="profile-name">Leon's Journal</div>
-      <button id="about-button">About</button>
-    </header>
+  <!-- favicon -->
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><style>.s{stroke:black}@media(prefers-color-scheme:dark){.s{stroke:white}}</style><rect class='s' x='5' y='5' width='90' height='90' fill='transparent' stroke-width='10'/></svg>">
+  <meta name="apple-mobile-web-app-title" content="LJ" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F0F0F0" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1A1A1A" />
 
-    <main id="content-area">
-      <div class="content-inner">
-        <div id="initial-loader" class="initial-loader">Loading...</div>
-      </div>
-    </main>
+  <!-- open graph -->
+  <meta property="og:title" content="Leon's Journal" />
+  <meta property="og:description" content="A page of things in my mind." />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Leon's Journal" />
+  <meta property="og:image" content="/og.webp">
 
-    <footer id="footer-bar">
-      <div id="filter-buttons">
-        <button class="filter-button active" data-filter="all">All</button>
-        <button class="filter-button" data-filter="text">Txt</button>
-        <button class="filter-button" data-filter="image">Img</button>
-        <button class="filter-button" data-filter="media">Media</button>
-        <button class="filter-button" data-filter="link">Link</button>
-      </div>
-      <button id="theme-toggle-button">System</button>
-    </footer>
+  <link rel="stylesheet" type="text/css" href="/style.css">
+  <title>Leon's Journal</title>
+</head>
 
-    <!-- About Modal -->
-    <div id="about-modal" class="modal-overlay" style="display: none;">
-      <div class="modal-content">
-        <span class="modal-close">&times;</span>
-        <h2>About</h2>
-        <p>This is a page of my thoughts, connected to my Are.na channel.</p>
-        <div id="modal-buttons">
-            <a href="https://leonw.ong" class="modal-button" target="_blank" rel="noopener">about me</a>
-            <a href="https://lok.on.computer" class="modal-button" target="_blank" rel="noopener">bluesky</a>
-            <a href="https://are.na/lok" class="modal-button" target="_blank" rel="noopener">are.na</a>
-            <a href="https://thoughts.page" class="modal-button" target="_blank" rel="noopener">thoughts.page</a>
-        </div>
+<body data-theme="system">
+
+  <header id="header-bar">
+    <div id="profile-name">Leon's Journal</div>
+    <button id="about-button">About</button>
+  </header>
+
+  <main id="content-area">
+    <div class="content-inner">
+      <div id="initial-loader" class="initial-loader">Loading...</div>
+    </div>
+  </main>
+
+  <footer id="footer-bar">
+    <div id="filter-buttons">
+      <button class="filter-button active" data-filter="all">All</button>
+      <button class="filter-button" data-filter="text">Txt</button>
+      <button class="filter-button" data-filter="image">Img</button>
+      <button class="filter-button" data-filter="media">Media</button>
+      <button class="filter-button" data-filter="link">Link</button>
+    </div>
+    <button id="theme-toggle-button">System</button>
+  </footer>
+
+  <!-- About Modal -->
+  <div id="about-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <span class="modal-close">&times;</span>
+      <h2>About</h2>
+      <p>This is a feed of my journal entries, powered by my <a href="https://www.are.na/lok/journaling-and-healing"
+          target="_blank" rel="noopener">are.na channel</a>.</p>
+      <p>Inspired by <a href="https://thoughts.page" target="_blank" rel="noopener">thoughts.page</a> and an are.na
+        meme, I started journaling on are.na in late 2024. It quickly became my micro blogging alternative. I like using
+        it as a quieter and more intentional space than twitter or other socials.</p>
+      <p>are.na is surprisingly powerful for this kind of thing. If you haven't heard of it please definitely give it a
+        try.
+      </p>
+      <p>You can find out more about me and my other online presences below.</p>
+      <div id="modal-buttons">
+        <a href="https://leonw.ong" class="modal-button" target="_blank" rel="noopener">more about me</a>
+        <a href="https://are.na/lok" class="modal-button" target="_blank" rel="noopener">my are.na</a>
+        <a href="https://lok.on.computer" class="modal-button" target="_blank" rel="noopener">bluesky</a>
+        <a href="https://rex.cat/@lok" class="modal-button" target="_blank" rel="noopener">fediverse</a>
       </div>
     </div>
+  </div>
 
-    <script id="blocks-config" type="application/json">__BLOCKS_CONFIG__</script>
-    <script src="/theme.js"></script>
-    <script src="/app.js"></script>
-  </body>
+  <script id="blocks-config" type="application/json">__BLOCKS_CONFIG__</script>
+  <script src="/theme.js"></script>
+  <script src="/app.js"></script>
+</body>
+
 </html>

@@ -79,28 +79,33 @@ export default {
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="Cache-Control" content="no-store">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- open graph -->
-    <meta property="og:title" content="Leon's Journal" />
-    <meta property="og:description" content="A page of things in my mind." />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Leon's Journal" />
-    <meta property="og:image" content="/og.webp" />
-
     <link rel="stylesheet" type="text/css" href="/style.css">
     <title>Leon's Journal - Embed</title>
     <style>
-      #header-bar, #footer-bar {
-        display: none !important;
+      #header-bar, #footer-bar { display: none !important; }
+      #content-area { padding: 0 1em !important; top: 0; bottom: 0; }
+      #content-area .content-inner { padding-top: 1em !important; }
+      .thought-container { margin-bottom: 1em !important; }
+      #embed-menu {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        z-index: 100;
       }
-      #content-area {
-        padding: 0 1em !important;
-        top: 0;
-        bottom: 0;
+      #embed-menu-toggle {
+        background-color: var(--button-bg);
+        border: 1px solid var(--block-border);
+        color: var(--text-color);
+        font-family: inherit;
+        font-size: 16px;
+        padding: 2px 8px 4px;
+        cursor: pointer;
+        line-height: 1;
+        opacity: 0.5;
+        transition: opacity 0.2s;
       }
-      .thought-container {
-        margin: 1em 0 !important;
-      }
+      #embed-menu-toggle:hover { opacity: 1; }
+      #embed-menu .dropdown-menu-up { bottom: 100%; right: 0; left: auto; margin-bottom: 5px; }
     </style>
   </head>
   <body data-theme="system">
@@ -109,6 +114,27 @@ export default {
         <div id="initial-loader" class="initial-loader">Loading...</div>
       </div>
     </main>
+    <div id="embed-menu" class="dropdown">
+      <button id="embed-menu-toggle" class="footer-button">···</button>
+      <div class="dropdown-menu dropdown-menu-up">
+        <div class="dropdown-section-label">Filter</div>
+        <button class="dropdown-item active" data-filter="all">All</button>
+        <button class="dropdown-item" data-filter="text">Text</button>
+        <button class="dropdown-item" data-filter="image">Image</button>
+        <button class="dropdown-item" data-filter="media">Media</button>
+        <button class="dropdown-item" data-filter="link">Link</button>
+        <div class="dropdown-divider"></div>
+        <div class="dropdown-section-label">Theme</div>
+        <button class="dropdown-item" data-theme="system">System</button>
+        <button class="dropdown-item" data-theme="light">Light</button>
+        <button class="dropdown-item" data-theme="dark">Dark</button>
+        <div class="dropdown-divider"></div>
+        <div class="dropdown-section-label">Layout</div>
+        <button class="dropdown-item" data-layout="feed">Feed</button>
+        <button class="dropdown-item" data-layout="wide">Wide</button>
+        <button class="dropdown-item" data-layout="xwide">XWide</button>
+      </div>
+    </div>
     <script id="blocks-config" type="application/json">${configJson}</script>
     <script src="/theme.js"></script>
     <script src="/app.js"></script>

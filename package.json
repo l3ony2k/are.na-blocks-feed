@@ -7,11 +7,14 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy"
   },
-  "dependencies": {
-    "wrangler": "^4.33.1"
+  "devDependencies": {
+    "wrangler": "^4.70.0"
   },
-  "devDependencies": {},
-  "keywords": ["cloudflare", "worker", "arena"],
+  "keywords": [
+    "cloudflare",
+    "worker",
+    "arena"
+  ],
   "author": "Leon",
   "license": "MIT"
 }

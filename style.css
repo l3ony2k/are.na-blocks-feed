@@ -96,7 +96,7 @@ body {
     position: relative;
 }
 
-/* --- Fixed Header & Theme Toggle Button --- */
+/* --- Fixed Header & Buttons --- */
 #header-bar {
     position: fixed;
     top: 0;
@@ -117,8 +117,8 @@ body {
     font-weight: 600;
 }
 
-#theme-toggle-button,
-#about-button {
+#about-button,
+.footer-button {
     background-color: var(--button-bg);
     border: 1px solid var(--block-border);
     color: var(--text-color);
@@ -128,41 +128,87 @@ body {
     user-select: none;
     cursor: pointer;
     transition: background-color 0.2s ease;
-    width: 70px;
     text-align: center;
 }
 
-#theme-toggle-button:hover,
-#about-button:hover {
+#about-button:hover,
+.footer-button:hover {
     background-color: var(--button-hover);
 }
 
-/* --- Filter Buttons --- */
-#filter-buttons {
-    display: flex;
-    gap: 5px;
-}
-
-.filter-button {
-    background-color: var(--button-bg);
-    border: 1px solid var(--block-border);
-    color: var(--text-color);
-    font-family: inherit;
-    font-size: 14px;
-    padding: 4px 10px;
-    user-select: none;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.filter-button:hover {
-    background-color: var(--button-hover);
-}
-
-.filter-button.active {
+.footer-button.open {
     background-color: var(--text-color);
     color: var(--bg-color);
     border-color: var(--text-color);
+}
+
+/* --- Dropdown Menus --- */
+.dropdown {
+    position: relative;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    background-color: var(--block-bg);
+    border: 1px solid var(--block-border);
+    box-shadow: 3px 3px 5px var(--shadow-color);
+    min-width: 100px;
+    z-index: 100;
+}
+
+.dropdown-menu.open {
+    display: block;
+}
+
+.dropdown-menu-up {
+    bottom: 100%;
+    left: 0;
+    margin-bottom: 5px;
+}
+
+.dropdown-menu-right {
+    left: auto;
+    right: 0;
+}
+
+.dropdown-item {
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 6px 12px;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    white-space: nowrap;
+}
+
+.dropdown-item:hover {
+    background-color: var(--button-hover);
+}
+
+.dropdown-item.active {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+}
+
+.dropdown-section-label {
+    font-size: 11px;
+    color: var(--meta-color);
+    padding: 6px 12px 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    user-select: none;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background-color: var(--block-border);
+    margin: 4px 0;
 }
 
 /* --- Main Scrolling Content Area --- */
@@ -179,8 +225,79 @@ body {
 /* Inner content container for centering and max-width */
 .content-inner {
     max-width: 50em;
-   margin: 0 auto;
-    padding: 0 1em;
+    /* default feed width */
+    margin: 0 auto;
+    padding: 1.5em 1em 0;
+    /* top padding matches thought-container gap so all columns align */
+    transition: max-width 0.3s ease;
+}
+
+/* --- Layout Modes (Masonry Javascript) --- */
+
+/* Base: full width for mobile */
+.content-inner {
+    max-width: 50em;
+    /* default feed width */
+    margin: 0 auto;
+    padding: 1.5em 1em 0;
+    transition: max-width 0.3s ease;
+}
+
+html.layout-wide .content-inner {
+    max-width: 70em;
+}
+
+html.layout-xwide .content-inner {
+    max-width: 100em;
+}
+
+/* Sizing elements for Masonry */
+.grid-sizer,
+.thought-container {
+    width: 100%;
+}
+
+.gutter-sizer {
+    width: 0;
+}
+
+.thought-container {
+    margin-bottom: 1.5em;
+    /* Masonry gutter spacing vertically */
+}
+
+/* Sizing for masonry grid columns */
+html.layout-wide .grid-sizer,
+html.layout-wide .thought-container {
+    width: calc(50% - 0.75em);
+    /* 2 columns, account for margin */
+}
+
+html.layout-wide .gutter-sizer {
+    width: 1.5em;
+}
+
+html.layout-xwide .grid-sizer,
+html.layout-xwide .thought-container {
+    width: calc(33.333% - 1em);
+    /* 3 columns, account for margin */
+}
+
+html.layout-xwide .gutter-sizer {
+    width: 1.5em;
+}
+
+/* JS Masonry will handle hiding non-matching blocks by applying display: none directly */
+
+/* On smaller screens, force single column regardless of layout setting */
+@media (max-width: 768px) {
+
+    html.layout-wide .grid-sizer,
+    html.layout-wide .thought-container,
+    html.layout-xwide .grid-sizer,
+    html.layout-xwide .thought-container {
+        width: 100%;
+    }
 }
 
 #infinite-loader {
@@ -225,8 +342,10 @@ body {
 }
 
 /* --- Thought Block Styling --- */
-.thought-container {
-    margin: 1.5em 0;
+
+/* Used by JS filter to hide non-matching blocks and transition out */
+.thought-container.block-hidden {
+    display: none;
 }
 
 .thought-container:target {
@@ -449,15 +568,6 @@ code {
     padding: 5px 10px;
 }
 
-#footer-bar p {
-    margin: 0;
-    line-height: 1;
-}
-
-#footer-bar a {
-    color: var(--link-color);
-}
-
 /* --- Markdown contents --- */
 ul p,
 ol p {
@@ -517,6 +627,8 @@ hr {
 /* Responsive images */
 img {
     max-width: 100%;
+    width: 100%;
+    /* Force images to fill their container width for consistent Masonry sizing */
     height: auto;
     display: block;
 }

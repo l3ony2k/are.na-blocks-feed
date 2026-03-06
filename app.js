@@ -229,6 +229,43 @@
     loader.id = "infinite-loader";
     loader.textContent = DEFAULT_LOADER_TEXT;
 
+    // Masonry setup
+    var msnry = null;
+    var layoutDebounceTimer = null;
+    function debouncedLayout() {
+      if (!msnry) return;
+      if (layoutDebounceTimer) clearTimeout(layoutDebounceTimer);
+      layoutDebounceTimer = setTimeout(function () {
+        msnry.layout();
+      }, 100);
+    }
+
+    // Watch for size changes on masonry items (images/iframes loading)
+    var resizeObserver = new ResizeObserver(function () {
+      debouncedLayout();
+    });
+
+    function observeItems(elements) {
+      elements.forEach(function (el) {
+        resizeObserver.observe(el);
+      });
+    }
+
+    function initMasonry() {
+      if (typeof Masonry !== 'undefined' && inner) {
+        msnry = new Masonry(inner, {
+          itemSelector: '.thought-container:not(.block-hidden)',
+          columnWidth: '.grid-sizer',
+          gutter: '.gutter-sizer',
+          percentPosition: true,
+          transitionDuration: 0
+        });
+        // Observe all existing items
+        var existingItems = inner.querySelectorAll('.thought-container');
+        observeItems(existingItems);
+      }
+    }
+
     function setLoaderVisible(visible) {
       if (visible) {
         loader.textContent = DEFAULT_LOADER_TEXT;
@@ -245,10 +282,12 @@
     }
 
     function appendHtml(html) {
-      if (!html) return;
+      if (!html) return [];
       var template = document.createElement("template");
       template.innerHTML = html;
-      inner.insertBefore(template.content, sentinel);
+      var newElements = Array.from(template.content.children);
+      inner.appendChild(template.content); // Append directly to inner since sentinel is now outside
+      return newElements;
     }
 
     function showError(message) {
@@ -283,9 +322,31 @@
           currentPage = nextPage;
 
           if (html.trim()) {
-            appendHtml(html);
+            var newElements = appendHtml(html);
             if (typeof window.initializeThoughtEnhancements === "function") {
               window.initializeThoughtEnhancements();
+            }
+
+            // Apply active filter to new elements
+            var currentFilter = document.documentElement.getAttribute('data-active-filter') || 'all';
+            if (currentFilter !== 'all') {
+              newElements.forEach(function (el) {
+                if (el.getAttribute('data-type') !== currentFilter) {
+                  el.classList.add('block-hidden');
+                }
+              });
+            }
+
+            // Tell masonry about new items and re-layout everything
+            if (msnry) {
+              // Observe new items for size changes (images/iframes loading)
+              observeItems(newElements);
+              // Full reload: re-scan for items and re-layout from scratch
+              msnry.reloadItems();
+              msnry.layout();
+              imagesLoaded(inner, function () {
+                msnry.layout();
+              });
             }
           }
 
@@ -332,6 +393,7 @@
         if (firstHtml.trim()) {
           var template = document.createElement("template");
           template.innerHTML = firstHtml;
+          var firstElements = Array.from(template.content.children);
           inner.appendChild(template.content);
         }
 
@@ -339,10 +401,19 @@
           window.initializeThoughtEnhancements();
         }
 
+        // Initialize Masonry after first batch
+        initMasonry();
+        if (msnry) {
+          msnry.layout();
+          imagesLoaded(inner, function () {
+            msnry.layout();
+          });
+        }
+
         // Step 4: Only set up pagination if there are more pages
         if (totalPages > 1) {
-          inner.appendChild(sentinel);
-          inner.appendChild(loader);
+          contentArea.appendChild(sentinel);
+          contentArea.appendChild(loader);
 
           observer = new IntersectionObserver(
             function (entries) {
@@ -354,12 +425,26 @@
             },
             {
               root: contentArea || null,
-              rootMargin: "200px",
-              threshold: 0.1,
+              rootMargin: "800px", // Increase margin to load earlier
+              threshold: 0,
             }
           );
 
           observer.observe(sentinel);
+
+          // Initial check: if sentinel is already in view (i.e. large screen), load more
+          setTimeout(function () {
+            var rect = sentinel.getBoundingClientRect();
+            if (rect.top < window.innerHeight + 800) {
+              loadNextPage();
+            }
+          }, 500);
+          setTimeout(function () {
+            var rect = sentinel.getBoundingClientRect();
+            if (rect.top < window.innerHeight + 800) {
+              loadNextPage();
+            }
+          }, 1500);
         }
 
         // Handle hash navigation
@@ -395,6 +480,8 @@
             ensureTargetBlock();
           }
         });
+        // Expose masonry globally for theme.js to call layout() on theme/layout changes
+        window.msnry = msnry;
       } catch (error) {
         console.error("Failed to load channel", error);
         showError("Failed to load channel: " + error.message);

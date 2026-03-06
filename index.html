@@ -35,19 +35,37 @@
 
   <main id="content-area">
     <div class="content-inner">
+      <div class="grid-sizer"></div>
+      <div class="gutter-sizer"></div>
       <div id="initial-loader" class="initial-loader">Loading...</div>
     </div>
   </main>
 
   <footer id="footer-bar">
-    <div id="filter-buttons">
-      <button class="filter-button active" data-filter="all">All</button>
-      <button class="filter-button" data-filter="text">Txt</button>
-      <button class="filter-button" data-filter="image">Img</button>
-      <button class="filter-button" data-filter="media">Media</button>
-      <button class="filter-button" data-filter="link">Link</button>
+    <div class="dropdown" id="filter-dropdown">
+      <button class="footer-button" id="filter-toggle">Filter</button>
+      <div class="dropdown-menu dropdown-menu-up">
+        <button class="dropdown-item active" data-filter="all">All</button>
+        <button class="dropdown-item" data-filter="text">Text</button>
+        <button class="dropdown-item" data-filter="image">Image</button>
+        <button class="dropdown-item" data-filter="media">Media</button>
+        <button class="dropdown-item" data-filter="link">Link</button>
+      </div>
     </div>
-    <button id="theme-toggle-button">System</button>
+    <div class="dropdown" id="settings-dropdown">
+      <button class="footer-button" id="settings-toggle">Settings</button>
+      <div class="dropdown-menu dropdown-menu-up dropdown-menu-right">
+        <div class="dropdown-section-label">Theme</div>
+        <button class="dropdown-item" data-theme="system">System</button>
+        <button class="dropdown-item" data-theme="light">Light</button>
+        <button class="dropdown-item" data-theme="dark">Dark</button>
+        <div class="dropdown-divider"></div>
+        <div class="dropdown-section-label">Layout</div>
+        <button class="dropdown-item" data-layout="feed">Feed</button>
+        <button class="dropdown-item" data-layout="wide">Wide</button>
+        <button class="dropdown-item" data-layout="xwide">XWide</button>
+      </div>
+    </div>
   </footer>
 
   <!-- About Modal -->
@@ -57,8 +75,9 @@
       <h2>About</h2>
       <p>This is a feed of my journal entries, powered by my <a href="https://www.are.na/lok/journaling-and-healing"
           target="_blank" rel="noopener">are.na channel</a>.</p>
-      <p>Inspired by <a href="https://thoughts.page" target="_blank" rel="noopener">thoughts.page</a> and an are.na
-        meme, I started journaling on are.na in late 2024. It quickly became my micro blogging alternative. I like using
+      <p>Inspired by <a href="https://thoughts.page" target="_blank" rel="noopener">thoughts.page</a> and <a
+          href="https://www.are.na/block/34289705" target="_blank" rel="noopener">this are.na meme</a>, I
+        started journaling on are.na in late 2024. It quickly became my micro blogging alternative. I like using
         it as a quieter and more intentional space than twitter or other socials.</p>
       <p>are.na is surprisingly powerful for this kind of thing. If you haven't heard of it please definitely give it a
         try.
@@ -66,14 +85,18 @@
       <p>You can find out more about me and my other online presences below.</p>
       <div id="modal-buttons">
         <a href="https://leonw.ong" class="modal-button" target="_blank" rel="noopener">more about me</a>
-        <a href="https://are.na/lok" class="modal-button" target="_blank" rel="noopener">my are.na</a>
-        <a href="https://lok.on.computer" class="modal-button" target="_blank" rel="noopener">bluesky</a>
+        <a href="https://are.na/lok" class="modal-button" target="_blank" rel="noopener">are.na</a>
+        <a href="https://aturi.to/did:plc:2p3gp2g2teuwpuv4skhiik3i" class="modal-button" target="_blank"
+          rel="noopener">atproto</a>
         <a href="https://rex.cat/@lok" class="modal-button" target="_blank" rel="noopener">fediverse</a>
       </div>
     </div>
   </div>
 
-  <script id="blocks-config" type="application/json">__BLOCKS_CONFIG__</script>
+  <script id="blocks-config"
+    type="application/json">{"channelSlug":"journaling-and-healing","pageSize":40,"accessToken":null}</script>
+  <script src="https://unpkg.com/imagesloaded@5/imagesloaded.pkgd.min.js"></script>
+  <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
   <script src="/theme.js"></script>
   <script src="/app.js"></script>
 </body>

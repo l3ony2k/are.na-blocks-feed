@@ -2,3 +2,5 @@
 .cursor/
 .vscode/
 .dev.vars
+node_modules/
+embed-test.html

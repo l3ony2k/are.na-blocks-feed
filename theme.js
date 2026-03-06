@@ -2,8 +2,13 @@
   "use strict";
 
   const THEMES = ["system", "light", "dark"];
-  const STORAGE_KEY = "theme-preference";
+  const LAYOUTS = ["feed", "wide", "xwide"];
+  const THEME_STORAGE_KEY = "theme-preference";
+  const LAYOUT_STORAGE_KEY = "layout-preference";
+
   let activeFilter = "all";
+  let activeTheme = "system";
+  let activeLayout = "feed";
 
   const setupTooltips = () => {
     const titleElements = document.querySelectorAll(".thought-title[data-tooltip-id]");
@@ -14,14 +19,10 @@
       }
 
       const tooltipId = titleElement.getAttribute("data-tooltip-id");
-      if (!tooltipId) {
-        return;
-      }
+      if (!tooltipId) return;
 
       const tooltipContent = document.getElementById(tooltipId);
-      if (!tooltipContent) {
-        return;
-      }
+      if (!tooltipContent) return;
 
       titleElement.setAttribute("data-tooltip-bound", "true");
 
@@ -74,82 +75,154 @@
   };
 
   const applyFilter = () => {
-    const containers = document.querySelectorAll(".thought-container");
-    containers.forEach((container) => {
-      const blockType = container.getAttribute("data-type");
-      if (activeFilter === "all" || blockType === activeFilter) {
-        container.style.display = "block";
+    // Rely completely on robust CSS selectors for filtering dynamically loaded blocks
+    document.documentElement.setAttribute('data-active-filter', activeFilter);
+
+    // Update active state in UI
+    const filterToggle = document.getElementById('filter-toggle');
+    document.querySelectorAll('[data-filter]').forEach(btn => {
+      if (btn.getAttribute('data-filter') === activeFilter) {
+        btn.classList.add('active');
+        if (filterToggle) filterToggle.textContent = `Filter: ${btn.textContent}`;
       } else {
-        container.style.display = "none";
+        btn.classList.remove('active');
       }
     });
-  };
 
-  const initializeThemeToggle = () => {
-    const themeToggleButton = document.getElementById("theme-toggle-button");
-    const body = document.body;
-    const htmlEl = document.documentElement;
-
-    const applyTheme = (theme) => {
-      if (themeToggleButton) {
-        themeToggleButton.textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
-      }
-
-      body.setAttribute("data-theme", theme);
-
-      if (theme === "system") {
-        htmlEl.classList.remove("theme-light", "theme-dark");
-      } else if (theme === "light") {
-        htmlEl.classList.add("theme-light");
-        htmlEl.classList.remove("theme-dark");
-      } else if (theme === "dark") {
-        htmlEl.classList.add("theme-dark");
-        htmlEl.classList.remove("theme-light");
-      }
-    };
-
-    const savePreference = (theme) => {
-      if (theme === "system") {
-        localStorage.removeItem(STORAGE_KEY);
-      } else {
-        localStorage.setItem(STORAGE_KEY, theme);
-      }
-    };
-
-    const savedTheme = localStorage.getItem(STORAGE_KEY);
-    const initialTheme = savedTheme || "system";
-    applyTheme(initialTheme);
-
-    if (themeToggleButton) {
-      themeToggleButton.addEventListener("click", () => {
-        const currentTheme = body.getAttribute("data-theme") || "system";
-        const currentIndex = THEMES.indexOf(currentTheme);
-        const nextTheme = THEMES[(currentIndex + 1) % THEMES.length];
-
-        applyTheme(nextTheme);
-        savePreference(nextTheme);
+    // Update masonry blocks and layout
+    if (window.msnry) {
+      document.querySelectorAll('.thought-container').forEach(el => {
+        if (activeFilter === 'all' || el.getAttribute('data-type') === activeFilter) {
+          el.classList.remove('block-hidden');
+        } else {
+          el.classList.add('block-hidden');
+        }
       });
+      // Tell masonry to ignore hidden items
+      window.msnry.options.itemSelector = '.thought-container:not(.block-hidden)';
+      window.msnry.reloadItems();
+      window.msnry.layout();
     }
   };
 
-  const initializeFilters = () => {
-    const filterButtons = document.querySelectorAll(".filter-button");
+  const applySettings = (theme, layout) => {
+    const body = document.body;
+    const htmlEl = document.documentElement;
 
-    const activeButton = document.querySelector(".filter-button.active");
-    activeFilter = activeButton ? activeButton.getAttribute("data-filter") || "all" : "all";
+    activeTheme = theme || "system";
+    activeLayout = layout || "feed";
 
-    filterButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        if (button.classList.contains("active")) {
-          return;
+    // Theme Application
+    body.setAttribute("data-theme", activeTheme);
+
+    htmlEl.classList.remove("theme-light", "theme-dark");
+    if (activeTheme === "light") {
+      htmlEl.classList.add("theme-light");
+    } else if (activeTheme === "dark") {
+      htmlEl.classList.add("theme-dark");
+    }
+
+    // Layout Application
+    htmlEl.classList.remove("layout-feed", "layout-wide", "layout-xwide");
+    htmlEl.classList.add(`layout-${activeLayout}`);
+
+    // Update UI Activations
+    document.querySelectorAll('[data-theme]').forEach(btn => {
+      if (btn.getAttribute('data-theme') === activeTheme) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    document.querySelectorAll('[data-layout]').forEach(btn => {
+      if (btn.getAttribute('data-layout') === activeLayout) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    // Save preferences
+    if (activeTheme === "system") {
+      localStorage.removeItem(THEME_STORAGE_KEY);
+    } else {
+      localStorage.setItem(THEME_STORAGE_KEY, activeTheme);
+    }
+
+    if (activeLayout === "feed") {
+      localStorage.removeItem(LAYOUT_STORAGE_KEY);
+    } else {
+      localStorage.setItem(LAYOUT_STORAGE_KEY, activeLayout);
+    }
+
+    // Re-layout masonry if it exists since container widths changed
+    if (window.msnry) {
+      setTimeout(() => {
+        window.msnry.options.columnWidth = '.grid-sizer';
+        window.msnry.layout();
+      }, 350); // wait for CSS transitions
+    }
+  };
+
+  const initializeDropdowns = () => {
+    const dropdowns = document.querySelectorAll(".dropdown");
+    const toggles = document.querySelectorAll(".footer-button");
+
+    // Close all open dropdowns
+    const closeAll = () => {
+      document.querySelectorAll(".dropdown-menu.open").forEach(menu => {
+        menu.classList.remove("open");
+        const toggle = menu.parentElement.querySelector('.footer-button');
+        if (toggle) toggle.classList.remove("open");
+      });
+    };
+
+    // Toggle click handlers
+    toggles.forEach(toggle => {
+      toggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const menu = toggle.nextElementSibling;
+        const isOpen = menu.classList.contains("open");
+
+        closeAll();
+
+        if (!isOpen) {
+          menu.classList.add("open");
+          toggle.classList.add("open");
+        }
+      });
+    });
+
+    // Item click handlers
+    document.querySelectorAll('.dropdown-item').forEach(item => {
+      item.addEventListener("click", (e) => {
+        // Filter actions
+        const filterVal = item.getAttribute('data-filter');
+        if (filterVal) {
+          activeFilter = filterVal;
+          applyFilter();
         }
 
-        filterButtons.forEach((btn) => btn.classList.remove("active"));
-        button.classList.add("active");
+        // Theme and Layout Actions
+        const themeVal = item.getAttribute('data-theme');
+        if (themeVal) {
+          applySettings(themeVal, activeLayout);
+        }
 
-        activeFilter = button.getAttribute("data-filter") || "all";
-        applyFilter();
+        const layoutVal = item.getAttribute('data-layout');
+        if (layoutVal) {
+          applySettings(activeTheme, layoutVal);
+        }
+
+        closeAll();
       });
+    });
+
+    // Outer click to close
+    document.addEventListener("click", () => closeAll());
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeAll();
     });
   };
 
@@ -191,8 +264,11 @@
   };
 
   document.addEventListener("DOMContentLoaded", () => {
-    initializeThemeToggle();
-    initializeFilters();
+    const initialTheme = localStorage.getItem(THEME_STORAGE_KEY) || "system";
+    const initialLayout = localStorage.getItem(LAYOUT_STORAGE_KEY) || "feed";
+    applySettings(initialTheme, initialLayout);
+
+    initializeDropdowns();
     initializeModal();
     initializeThoughtEnhancements();
   });

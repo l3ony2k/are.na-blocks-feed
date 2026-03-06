@@ -223,21 +223,9 @@ body {
 }
 
 /* Inner content container for centering and max-width */
+/* --- Layout Modes (Masonry) --- */
 .content-inner {
     max-width: 50em;
-    /* default feed width */
-    margin: 0 auto;
-    padding: 1.5em 1em 0;
-    /* top padding matches thought-container gap so all columns align */
-    transition: max-width 0.3s ease;
-}
-
-/* --- Layout Modes (Masonry Javascript) --- */
-
-/* Base: full width for mobile */
-.content-inner {
-    max-width: 50em;
-    /* default feed width */
     margin: 0 auto;
     padding: 1.5em 1em 0;
     transition: max-width 0.3s ease;
@@ -287,7 +275,7 @@ html.layout-xwide .gutter-sizer {
     width: 1.5em;
 }
 
-/* JS Masonry will handle hiding non-matching blocks by applying display: none directly */
+
 
 /* On smaller screens, force single column regardless of layout setting */
 @media (max-width: 768px) {

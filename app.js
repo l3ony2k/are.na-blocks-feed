@@ -286,7 +286,7 @@
       var template = document.createElement("template");
       template.innerHTML = html;
       var newElements = Array.from(template.content.children);
-      inner.appendChild(template.content); // Append directly to inner since sentinel is now outside
+      inner.appendChild(template.content);
       return newElements;
     }
 

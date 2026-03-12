@@ -61,7 +61,7 @@ bunx wrangler deploy
 1. Create a channel on [Are.na](https://are.na)
 2. Note your channel slug from the URL: `are.na/your-username/channel-slug`
 3. Add blocks (text, images, links, media) to your channel
-4. For private channels, generate an access token at [dev.are.na](https://dev.are.na)
+4. For private channels, generate an access token from the Are.na developer settings and keep it in `ARENA_ACCESS_TOKEN`
 
 ### Edit the HTML
 
@@ -74,7 +74,7 @@ bunx wrangler deploy
 
 ## How It Works
 
-1. **API Fetching**: The Worker fetches blocks from the Are.na API (`https://api.are.na/v2/channels/{slug}?per=100`)
+1. **API Fetching**: The client reads channel metadata from `https://api.are.na/v3/channels/{slug}` and paginated blocks from `https://api.are.na/v3/channels/{slug}/contents`
 2. **Caching**: API responses are cached at Cloudflare's edge for 5 minutes
 3. **Rendering**: Blocks are rendered into HTML based on their type:
    - **Text**: Displayed as paragraphs with line breaks preserved

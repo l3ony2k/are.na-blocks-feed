@@ -89,15 +89,16 @@
       }
     });
 
+    document.querySelectorAll('.thought-container').forEach(el => {
+      if (activeFilter === 'all' || el.getAttribute('data-type') === activeFilter) {
+        el.classList.remove('block-hidden');
+      } else {
+        el.classList.add('block-hidden');
+      }
+    });
+
     // Update masonry blocks and layout
     if (window.msnry) {
-      document.querySelectorAll('.thought-container').forEach(el => {
-        if (activeFilter === 'all' || el.getAttribute('data-type') === activeFilter) {
-          el.classList.remove('block-hidden');
-        } else {
-          el.classList.add('block-hidden');
-        }
-      });
       // Tell masonry to ignore hidden items
       window.msnry.options.itemSelector = '.thought-container:not(.block-hidden)';
       window.msnry.reloadItems();
@@ -156,13 +157,12 @@
       localStorage.setItem(LAYOUT_STORAGE_KEY, activeLayout);
     }
 
-    // Re-layout masonry if it exists since container widths changed
-    if (window.msnry) {
-      setTimeout(() => {
-        window.msnry.options.columnWidth = '.grid-sizer';
-        window.msnry.layout();
-      }, 350); // wait for CSS transitions
-    }
+    setTimeout(() => {
+      if (typeof window.syncThoughtLayout === "function") {
+        window.syncThoughtLayout();
+      }
+      applyFilter();
+    }, 350); // wait for CSS transitions
   };
 
   const initializeDropdowns = () => {

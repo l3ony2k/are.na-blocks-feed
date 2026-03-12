@@ -5,7 +5,9 @@
   "main": "src/worker.ts",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "build:dev-bundle": "wrangler deploy --dry-run --outdir .wrangler/tmp-bundle",
+    "dev:prebuilt": "wrangler dev --no-bundle .wrangler/tmp-bundle/worker.js --port 8787 --show-interactive-dev-session=false"
   },
   "devDependencies": {
     "wrangler": "^4.70.0"

@@ -394,6 +394,30 @@
     var msnry = null;
     var layoutDebounceTimer = null;
 
+    function isMasonryLayout() {
+      return !document.documentElement.classList.contains("layout-feed");
+    }
+
+    function clearInlineLayoutStyles() {
+      var resetElementStyles = function (element, properties) {
+        if (!element || !element.style) return;
+
+        properties.forEach(function (property) {
+          element.style.removeProperty(property);
+        });
+
+        if (!element.getAttribute("style")) {
+          element.removeAttribute("style");
+        }
+      };
+
+      resetElementStyles(inner, ["position", "height", "width"]);
+
+      Array.from(inner.querySelectorAll(".thought-container")).forEach(function (element) {
+        resetElementStyles(element, ["position", "left", "right", "top", "bottom"]);
+      });
+    }
+
     function debouncedLayout() {
       if (!msnry) return;
       if (layoutDebounceTimer) clearTimeout(layoutDebounceTimer);
@@ -413,16 +437,46 @@
     }
 
     function initMasonry() {
-      if (typeof Masonry !== "undefined" && inner) {
-        msnry = new Masonry(inner, {
-          itemSelector: ".thought-container:not(.block-hidden)",
-          columnWidth: ".grid-sizer",
-          gutter: ".gutter-sizer",
-          percentPosition: true,
-          transitionDuration: 0,
-        });
+      if (!isMasonryLayout() || msnry || typeof Masonry === "undefined" || !inner) {
+        return;
+      }
 
-        observeItems(Array.from(inner.querySelectorAll(".thought-container")));
+      msnry = new Masonry(inner, {
+        itemSelector: ".thought-container:not(.block-hidden)",
+        columnWidth: ".grid-sizer",
+        gutter: ".gutter-sizer",
+        percentPosition: false,
+        transitionDuration: 0,
+      });
+
+      observeItems(Array.from(inner.querySelectorAll(".thought-container")));
+    }
+
+    function syncLayoutEngine() {
+      if (!isMasonryLayout()) {
+        if (msnry) {
+          msnry.destroy();
+          msnry = null;
+        }
+
+        clearInlineLayoutStyles();
+        window.msnry = null;
+        return;
+      }
+
+      initMasonry();
+
+      if (msnry) {
+        msnry.options.itemSelector = ".thought-container:not(.block-hidden)";
+        msnry.options.columnWidth = ".grid-sizer";
+        msnry.reloadItems();
+        msnry.layout();
+        imagesLoaded(inner, function () {
+          if (msnry) {
+            msnry.layout();
+          }
+        });
+        window.msnry = msnry;
       }
     }
 
@@ -557,15 +611,7 @@
           window.initializeThoughtEnhancements();
         }
 
-        initMasonry();
-        window.msnry = msnry;
-
-        if (msnry) {
-          msnry.layout();
-          imagesLoaded(inner, function () {
-            msnry.layout();
-          });
-        }
+        syncLayoutEngine();
 
         if (totalPages > 1) {
           contentArea.appendChild(sentinel);
@@ -640,5 +686,7 @@
         showError("Failed to load channel: " + error.message);
       }
     })();
+
+    window.syncThoughtLayout = syncLayoutEngine;
   });
 })();

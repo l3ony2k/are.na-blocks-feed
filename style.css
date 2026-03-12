@@ -218,6 +218,7 @@ body {
     bottom: 35px;
     left: 0;
     right: 0;
+    padding: 0 1em;
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -227,8 +228,9 @@ body {
 .content-inner {
     max-width: 50em;
     margin: 0 auto;
-    padding: 1.5em 1em 0;
+    padding: 1.5em 0 0;
     transition: max-width 0.3s ease;
+    overflow-x: clip;
 }
 
 html.layout-wide .content-inner {
@@ -257,8 +259,7 @@ html.layout-xwide .content-inner {
 /* Sizing for masonry grid columns */
 html.layout-wide .grid-sizer,
 html.layout-wide .thought-container {
-    width: calc(50% - 0.75em);
-    /* 2 columns, account for margin */
+    width: calc((100% - 1.5em) / 2);
 }
 
 html.layout-wide .gutter-sizer {
@@ -267,8 +268,7 @@ html.layout-wide .gutter-sizer {
 
 html.layout-xwide .grid-sizer,
 html.layout-xwide .thought-container {
-    width: calc(33.333% - 1em);
-    /* 3 columns, account for margin */
+    width: calc((100% - 3em) / 3);
 }
 
 html.layout-xwide .gutter-sizer {
@@ -285,6 +285,11 @@ html.layout-xwide .gutter-sizer {
     html.layout-xwide .grid-sizer,
     html.layout-xwide .thought-container {
         width: 100%;
+    }
+
+    html.layout-wide .gutter-sizer,
+    html.layout-xwide .gutter-sizer {
+        width: 0;
     }
 }
 

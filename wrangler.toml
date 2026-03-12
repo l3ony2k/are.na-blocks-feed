@@ -5,11 +5,9 @@ compatibility_date = "2025-05-26"
 [vars]
 CHANNEL_SLUG = "journaling-and-healing"
 
-format = "modules"
-
 [[rules]]
 type = "Text"
-globs = ["*.html", "*.css", "*.js"]
+globs = ["**/index.html", "**/style.css", "**/app.js", "**/theme.js"]
 fallthrough = true
 
 [[rules]]

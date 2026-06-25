@@ -3,6 +3,8 @@ import templateHtml from "../index.html";
 import styleCss from "../style.css";
 import themeJs from "../theme.js";
 import appJs from "../app.js";
+import embedJs from "../embed.js";
+import embedTestHtml from "../embed-test.html";
 // @ts-ignore - WebP import handled by wrangler
 import ogImage from "../og.webp";
 
@@ -56,6 +58,16 @@ export default {
       });
     }
 
+    if (url.pathname === "/embed.js") {
+      return new Response(embedJs, {
+        headers: {
+          "content-type": "application/javascript; charset=utf-8",
+          "cache-control": `public, max-age=${CACHE_TTL}`,
+          "access-control-allow-origin": "*",
+        },
+      });
+    }
+
     if (url.pathname === "/og.webp") {
       return new Response(ogImage, {
         headers: {
@@ -65,8 +77,17 @@ export default {
       });
     }
 
-    if (url.pathname !== "/" && url.pathname !== "/embed") {
+    if (url.pathname !== "/" && url.pathname !== "/embed" && url.pathname !== "/embed-test") {
       return new Response("Not found", { status: 404 });
+    }
+
+    if (url.pathname === "/embed-test") {
+      return new Response(embedTestHtml, {
+        headers: {
+          "content-type": "text/html; charset=utf-8",
+          "cache-control": "no-store",
+        },
+      });
     }
 
     const slug = env.CHANNEL_SLUG;

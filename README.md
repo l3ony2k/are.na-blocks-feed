@@ -60,7 +60,7 @@ bunx wrangler deploy
 
 1. Create a channel on [Are.na](https://are.na)
 2. Note your channel slug from the URL: `are.na/your-username/channel-slug`
-3. Add blocks (text, images, links, media) to your channel
+3. Add blocks (text, images, links, attachments, embeds) to your channel
 4. For private channels, generate an access token from the Are.na developer settings and keep it in `ARENA_ACCESS_TOKEN`
 
 ### Edit the HTML
@@ -79,7 +79,8 @@ bunx wrangler deploy
 3. **Rendering**: Blocks are rendered into HTML based on their type:
    - **Text**: Displayed as paragraphs with line breaks preserved
    - **Image**: Displayed as responsive images
-   - **Media**: Embedded media content
+- **Attachment**: Uploaded files and file previews
+- **Embed**: Embedded media content
    - **Link**: Clickable links with titles
 4. **Static Assets**: CSS and JS are served inline with long cache headers
 5. **Theme**: JavaScript handles system/light/dark theme switching with localStorage persistence
@@ -88,5 +89,6 @@ bunx wrangler deploy
 
 - **Text**: Plain text thoughts and notes
 - **Image**: Images with automatic responsive sizing
-- **Media**: Embedded media content (videos, etc.)
+- **Attachment**: Uploaded files and file previews
+- **Embed**: Embedded media content (videos, etc.)
 - **Link**: External links with titles and descriptions

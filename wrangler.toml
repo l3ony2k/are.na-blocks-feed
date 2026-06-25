@@ -7,7 +7,7 @@ CHANNEL_SLUG = "journaling-and-healing"
 
 [[rules]]
 type = "Text"
-globs = ["**/index.html", "**/style.css", "**/app.js", "**/theme.js"]
+globs = ["**/index.html", "**/style.css", "**/app.js", "**/theme.js", "**/embed.js", "**/embed-test.html"]
 fallthrough = true
 
 [[rules]]

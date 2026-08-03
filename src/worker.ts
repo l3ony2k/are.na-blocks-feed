@@ -115,7 +115,7 @@ export default {
       }
       #embed-menu-toggle {
         background-color: var(--button-bg);
-        border: 1px solid var(--block-border);
+        border: 1px solid var(--internal-border);
         color: var(--text-color);
         font-family: inherit;
         font-size: 16px;

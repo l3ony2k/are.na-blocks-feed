@@ -83,7 +83,7 @@
     document.querySelectorAll('[data-filter]').forEach(btn => {
       if (btn.getAttribute('data-filter') === activeFilter) {
         btn.classList.add('active');
-        if (filterToggle) filterToggle.textContent = `Filter: ${btn.textContent}`;
+        if (filterToggle) filterToggle.textContent = activeFilter === 'all' ? 'Filter' : btn.textContent;
       } else {
         btn.classList.remove('active');
       }

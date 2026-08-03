@@ -5,9 +5,11 @@
     --dot-color: #cacaca;
     --text-color: #333;
     --block-bg: #fff;
-    --block-border: #333;
+    --block-border: #333333;
     --header-bg: #f0f0f0;
-    --header-border: #333;
+    --header-border: #333333;
+    --internal-border: #c4c4c4;
+    --internal-border-hover: #8f8f8f;
     --button-bg: #ddd;
     --button-hover: #ccc;
     --link-color: #0077cc;
@@ -27,6 +29,8 @@
         --block-border: #555;
         --header-bg: #1a1a1a;
         --header-border: #444;
+        --internal-border: #555;
+        --internal-border-hover: #555;
         --button-bg: #333;
         --button-hover: #444;
         --link-color: #66b3ff;
@@ -43,9 +47,11 @@ html.theme-light {
     --dot-color: #cacaca;
     --text-color: #333;
     --block-bg: #fff;
-    --block-border: #333;
+    --block-border: #333333;
     --header-bg: #f0f0f0;
-    --header-border: #333;
+    --header-border: #333333;
+    --internal-border: #c4c4c4;
+    --internal-border-hover: #8f8f8f;
     --button-bg: #ddd;
     --button-hover: #ccc;
     --link-color: #0077cc;
@@ -64,6 +70,8 @@ html.theme-dark {
     --block-border: #555;
     --header-bg: #1a1a1a;
     --header-border: #444;
+    --internal-border: #555;
+    --internal-border-hover: #555;
     --button-bg: #333;
     --button-hover: #444;
     --link-color: #66b3ff;
@@ -120,7 +128,7 @@ body {
 #about-button,
 .footer-button {
     background-color: var(--button-bg);
-    border: 1px solid var(--block-border);
+    border: 1px solid var(--internal-border);
     color: var(--text-color);
     font-family: inherit;
     font-size: 14px;
@@ -207,7 +215,7 @@ body {
 
 .dropdown-divider {
     height: 1px;
-    background-color: var(--block-border);
+    background-color: var(--internal-border);
     margin: 4px 0;
 }
 
@@ -461,7 +469,7 @@ html.layout-xwide .gutter-sizer {
     width: 100px;
     height: 100px;
     object-fit: cover;
-    border: 1px solid var(--block-border);
+    border: 1px solid var(--internal-border);
 }
 
 .link-main {
@@ -481,7 +489,7 @@ html.layout-xwide .gutter-sizer {
 .link-button {
     display: inline-block;
     background-color: var(--button-bg);
-    border: 1px solid var(--block-border);
+    border: 1px solid var(--internal-border);
     color: var(--text-color);
     font-family: inherit;
     font-size: 0.8rem;
@@ -512,7 +520,7 @@ strong {
 }
 
 blockquote {
-    border-left: 2px solid var(--block-border);
+    border-left: 2px solid var(--internal-border);
     padding-left: 0.8em;
     margin-left: 0;
     color: var(--meta-color);
@@ -579,7 +587,7 @@ p {
 
 hr {
     border: 0;
-    border-top: 2px dashed var(--block-border);
+    border-top: 2px dashed var(--internal-border);
     margin: .8em 0;
 }
 
@@ -679,7 +687,7 @@ img {
 .modal-button {
     display: inline-block;
     background-color: var(--button-bg);
-    border: 1px solid var(--block-border);
+    border: 1px solid var(--internal-border);
     color: var(--text-color);
     font-family: inherit;
     font-size: 0.9rem;
@@ -691,6 +699,25 @@ img {
 .modal-button:hover {
     background-color: var(--button-hover);
     text-decoration: none;
+}
+
+/* Header/footer separators are internal in light mode only. */
+body[data-theme="light"] #header-bar {
+    border-bottom-color: var(--internal-border);
+}
+
+body[data-theme="light"] #footer-bar {
+    border-top-color: var(--internal-border);
+}
+
+@media (prefers-color-scheme: light) {
+    body[data-theme="system"] #header-bar {
+        border-bottom-color: var(--internal-border);
+    }
+
+    body[data-theme="system"] #footer-bar {
+        border-top-color: var(--internal-border);
+    }
 }
 
 /* --- Scrollbar Styling (ported) --- */
